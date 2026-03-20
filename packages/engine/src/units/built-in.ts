@@ -1,3 +1,4 @@
+import { registerCssUnits } from "./css.js";
 import type { UnitDefinition } from "./registry.js";
 import { UnitRegistry } from "./registry.js";
 
@@ -90,6 +91,8 @@ export function createDefaultRegistry(): UnitRegistry {
   for (const unit of allUnits) {
     registry.addUnit(unit);
   }
+
+  registerCssUnits(registry);
 
   return registry;
 }
