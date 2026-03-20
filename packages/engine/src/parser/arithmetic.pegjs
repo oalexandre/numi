@@ -58,9 +58,25 @@ Expression
   = Conversion
 
 Conversion
-  = left:Addition __ ("in" / "to" / "as") __ unit:UnitName
+  = left:BitwiseOr __ ("in" / "to" / "as") __ unit:UnitName
     { return { type: "conversion", value: left, targetUnit: unit }; }
-  / Addition
+  / BitwiseOr
+
+BitwiseOr
+  = head:BitwiseXor tail:(__ ("OR") __ BitwiseXor)*
+    { return buildBinaryExpr(head, tail); }
+
+BitwiseXor
+  = head:BitwiseAnd tail:(__ ("XOR") __ BitwiseAnd)*
+    { return buildBinaryExpr(head, tail); }
+
+BitwiseAnd
+  = head:Shift tail:(__ ("AND") __ Shift)*
+    { return buildBinaryExpr(head, tail); }
+
+Shift
+  = head:Addition tail:(_ ("<<" / ">>") _ Addition)*
+    { return buildBinaryExpr(head, tail); }
 
 Addition
   = head:Multiplication tail:(_ ("+" / "-") _ Multiplication)*
@@ -76,7 +92,9 @@ Power
   / Unary
 
 Unary
-  = op:("-" / "+") _ expr:Postfix
+  = "NOT" __ expr:Postfix
+    { return { type: "unary", op: "NOT", value: expr }; }
+  / op:("-" / "+") _ expr:Postfix
     { return { type: "unary", op, value: expr }; }
   / Postfix
 

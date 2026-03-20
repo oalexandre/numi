@@ -219,6 +219,16 @@ function evaluateBinary(
         throw new EvalError("Modulo by zero");
       }
       return l % r;
+    case "AND":
+      return (Math.trunc(l) & Math.trunc(r)) >>> 0;
+    case "OR":
+      return (Math.trunc(l) | Math.trunc(r)) >>> 0;
+    case "XOR":
+      return (Math.trunc(l) ^ Math.trunc(r)) >>> 0;
+    case "<<":
+      return (Math.trunc(l) << Math.trunc(r)) >>> 0;
+    case ">>":
+      return Math.trunc(l) >> Math.trunc(r);
     default:
       throw new EvalError(`Unknown operator "${op}"`);
   }
@@ -240,6 +250,8 @@ function evaluateUnary(
       return -v;
     case "+":
       return v;
+    case "NOT":
+      return ~Math.trunc(v) >>> 0;
     default:
       throw new EvalError(`Unknown unary operator "${op}"`);
   }
