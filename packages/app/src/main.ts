@@ -12,6 +12,7 @@ import {
 import { loadAllNotes, saveNote, deleteNote, generateId } from "./notes.js";
 import type { NoteData } from "./notes.js";
 import { loadSettings, saveSetting } from "./settings.js";
+import { createTray } from "./tray.js";
 
 const isDev = !app.isPackaged;
 const unitRegistry = createDefaultRegistry();
@@ -93,6 +94,14 @@ function createWindow(): void {
     }
   });
 
+  // Minimize to tray instead of quitting on close
+  mainWindow.on("close", (event) => {
+    if (!app.isQuitting) {
+      event.preventDefault();
+      mainWindow?.hide();
+    }
+  });
+
   mainWindow.on("focus", () => {
     pluginLoader.reload();
   });
@@ -104,9 +113,16 @@ function createWindow(): void {
   }
 }
 
+// Track quit intent for close-to-tray behavior
+app.isQuitting = false;
+app.on("before-quit", () => {
+  app.isQuitting = true;
+});
+
 app.whenReady().then(() => {
   pluginLoader.loadAll();
   createWindow();
+  createTray(() => mainWindow);
 
   app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) {
