@@ -36,7 +36,7 @@ export default [
     },
   },
   {
-    files: ["*.config.ts", "*.config.js"],
+    files: ["*.config.ts", "*.config.js", "**/*.d.ts"],
     rules: {
       "import-x/no-default-export": "off",
     },

@@ -14,7 +14,7 @@ const unitRegistry = createDefaultRegistry();
 const funcRegistry = new FunctionRegistry();
 const pluginHost = new PluginHost(unitRegistry, funcRegistry);
 const pluginLoader = new PluginLoader(pluginHost, {
-  builtInDir: resolve(__dirname, "../../plugins/CommunityExtensions"),
+  builtInDir: resolve(import.meta.dirname, "../../plugins/CommunityExtensions"),
 });
 const doc = new Document(unitRegistry);
 
@@ -28,7 +28,7 @@ function createWindow(): void {
     minHeight: 320,
     titleBarStyle: process.platform === "darwin" ? "hiddenInset" : "default",
     webPreferences: {
-      preload: join(__dirname, "../preload/preload.mjs"),
+      preload: join(import.meta.dirname, "../preload/preload.mjs"),
       sandbox: false,
     },
   });
@@ -45,7 +45,7 @@ function createWindow(): void {
   if (isDev && process.env["ELECTRON_RENDERER_URL"]) {
     mainWindow.loadURL(process.env["ELECTRON_RENDERER_URL"]);
   } else {
-    mainWindow.loadFile(join(__dirname, "../renderer/index.html"));
+    mainWindow.loadFile(join(import.meta.dirname, "../renderer/index.html"));
   }
 }
 

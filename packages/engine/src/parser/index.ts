@@ -1,16 +1,9 @@
-import { readFileSync } from "node:fs";
-import { resolve, dirname } from "node:path";
-import { fileURLToPath } from "node:url";
-
 import peggy from "peggy";
 
 import type { ASTNode } from "../ast.js";
 
-const grammarPath = resolve(
-  dirname(fileURLToPath(import.meta.url)),
-  "arithmetic.pegjs",
-);
-const grammarSource = readFileSync(grammarPath, "utf-8");
+import grammarSource from "./arithmetic.pegjs?raw";
+
 const parser = peggy.generate(grammarSource);
 
 export interface ParseOptions {
