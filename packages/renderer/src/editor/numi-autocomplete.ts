@@ -110,39 +110,40 @@ async function numiCompletions(context: CompletionContext): Promise<CompletionRe
 
   // Check if we're typing a word
   const wordMatch = textBefore.match(/([a-zA-Z_]\w*)$/);
-  if (!wordMatch) {
-    // Only complete on explicit Ctrl+Space
-    if (!context.explicit) return null;
-    return null;
-  }
-
-  const word = wordMatch[1] ?? "";
+  const word = wordMatch?.[1] ?? "";
   const from = context.pos - word.length;
 
-  // Don't complete single characters unless explicit
-  if (word.length < 2 && !context.explicit) return null;
+  // If no word typed yet, only show full catalog on explicit Ctrl+Space
+  if (word.length === 0 && !context.explicit) return null;
+
+  // If typing but less than 2 chars, only show on explicit Ctrl+Space
+  if (word.length === 1 && !context.explicit) return null;
 
   const allUnits = await getAllUnits();
 
+  const filter = word.toLowerCase();
+  const matchesFilter = (label: string) => filter === "" || label.toLowerCase().startsWith(filter);
+
   const options = [
-    ...FUNCTIONS.filter((f) => f.label.startsWith(word.toLowerCase())).map((f) => ({
+    ...FUNCTIONS.filter((f) => matchesFilter(f.label)).map((f) => ({
       ...f,
       type: "function" as const,
     })),
-    ...CONSTANTS.filter((c) => c.label.startsWith(word.toLowerCase())).map((c) => ({
+    ...CONSTANTS.filter((c) => matchesFilter(c.label)).map((c) => ({
       ...c,
       type: "constant" as const,
     })),
-    ...KEYWORDS.filter((k) => k.label.startsWith(word.toLowerCase())).map((k) => ({
+    ...KEYWORDS.filter((k) => matchesFilter(k.label)).map((k) => ({
       ...k,
       type: "keyword" as const,
     })),
+    ...BASE_TARGETS.filter((b) => matchesFilter(b.label)).map((b) => ({
+      ...b,
+      type: "keyword" as const,
+    })),
     ...allUnits
-      .filter(
-        (u) =>
-          u.toLowerCase().startsWith(word.toLowerCase()) && u.length > 1,
-      )
-      .slice(0, 15)
+      .filter((u) => matchesFilter(u) && u.length > 1)
+      .slice(0, 20)
       .map((u) => ({ label: u, type: "unit" as const })),
   ];
 
@@ -153,6 +154,6 @@ async function numiCompletions(context: CompletionContext): Promise<CompletionRe
 
 export const numiAutocompletion = autocompletion({
   override: [numiCompletions],
-  activateOnTyping: false, // Only on Ctrl+Space by default
+  activateOnTyping: true,
   defaultKeymap: true,
 });
