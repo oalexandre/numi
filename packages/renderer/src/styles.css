@@ -1,0 +1,78 @@
+@import "tailwindcss";
+
+:root {
+  --bg-primary: #1e1e2e;
+  --bg-editor: #1e1e2e;
+  --bg-results: #181825;
+  --text-primary: #cdd6f4;
+  --text-result: #a6e3a1;
+  --text-error: #f38ba8;
+  --border: #313244;
+  --accent: #89b4fa;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg-primary: #ffffff;
+    --bg-editor: #ffffff;
+    --bg-results: #f8fafc;
+    --text-primary: #1e293b;
+    --text-result: #16a34a;
+    --text-error: #dc2626;
+    --border: #e2e8f0;
+    --accent: #2563eb;
+  }
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family:
+    "SF Mono",
+    "Cascadia Code",
+    "JetBrains Mono",
+    "Fira Code",
+    Menlo,
+    Consolas,
+    monospace;
+  font-size: 14px;
+  overflow: hidden;
+}
+
+.cm-editor {
+  height: 100%;
+  background: transparent !important;
+}
+
+.cm-editor .cm-scroller {
+  font-family: inherit !important;
+  font-size: 14px !important;
+  line-height: 1.6 !important;
+  overflow-y: hidden !important;
+}
+
+.cm-editor .cm-content {
+  padding: 16px 16px 50vh 16px !important;
+}
+
+.cm-editor .cm-gutters {
+  display: none !important;
+}
+
+.cm-editor .cm-activeLine {
+  background: rgba(255, 255, 255, 0.03) !important;
+}
+
+.cm-editor .cm-selectionBackground {
+  background: rgba(137, 180, 250, 0.2) !important;
+}
+
+.cm-editor.cm-focused {
+  outline: none !important;
+}
