@@ -3,11 +3,11 @@ import { join, resolve } from "node:path";
 import { app, BrowserWindow, ipcMain, nativeTheme } from "electron";
 import {
   Document,
-  createDefaultRegistry,
-  FunctionRegistry,
+  createEntityRegistry,
   PluginHost,
   PluginLoader,
 } from "@engine/index";
+import type { EntityInfo } from "@engine/index";
 
 import { loadAllNotes, saveNote, deleteNote, generateId } from "./notes.js";
 import type { NoteData } from "./notes.js";
@@ -16,13 +16,12 @@ import { loadSettings, saveSetting } from "./settings.js";
 import { createTray } from "./tray.js";
 
 const isDev = !app.isPackaged;
-const unitRegistry = createDefaultRegistry();
-const funcRegistry = new FunctionRegistry();
-const pluginHost = new PluginHost(unitRegistry, funcRegistry);
+const entityRegistry = createEntityRegistry();
+const pluginHost = new PluginHost(entityRegistry);
 const pluginLoader = new PluginLoader(pluginHost, {
-  builtInDir: resolve(import.meta.dirname, "../../plugins/CommunityExtensions"),
+  builtInDir: resolve(import.meta.dirname, "../../plugins/CommunityPlugins"),
 });
-const doc = new Document(unitRegistry);
+const doc = new Document(entityRegistry);
 
 let mainWindow: BrowserWindow | null = null;
 
@@ -50,11 +49,15 @@ function createWindow(): void {
   });
 
   ipcMain.handle("numi:getCompletions", (_event, unitPhrase: string) => {
-    return unitRegistry.getCompatiblePhrases(unitPhrase);
+    return entityRegistry.getUnitRegistry().getCompatiblePhrases(unitPhrase);
   });
 
   ipcMain.handle("numi:getAllUnits", () => {
-    return unitRegistry.getAllPhrases();
+    return entityRegistry.getUnitRegistry().getAllPhrases();
+  });
+
+  ipcMain.handle("numi:getEntityNames", (): EntityInfo[] => {
+    return entityRegistry.getAllEntityInfo();
   });
 
   ipcMain.handle("numi:getTheme", () => {
@@ -113,6 +116,9 @@ function createWindow(): void {
 
   mainWindow.on("focus", () => {
     pluginLoader.reload();
+    // Refresh parse options after plugin reload (new functions/units may have been added)
+    doc.refreshParseOptions();
+    mainWindow?.webContents.send("numi:entitiesChanged");
   });
 
   if (isDev && process.env["ELECTRON_RENDERER_URL"]) {
@@ -130,6 +136,8 @@ app.on("before-quit", () => {
 
 app.whenReady().then(() => {
   pluginLoader.loadAll();
+  // Rebuild parse options after all plugins are loaded
+  doc.refreshParseOptions();
   createAppMenu();
   createWindow();
   createTray(() => mainWindow);

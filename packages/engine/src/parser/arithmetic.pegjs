@@ -2,22 +2,6 @@
 // Covers: +, -, *, /, ^, mod, parentheses, unary, numbers, functions, constants, percentages, units, conversions, assignments, variables
 
 {{
-const KNOWN_FUNCTIONS = new Set([
-  "sqrt", "cbrt", "abs", "ceil", "floor", "round", "trunc",
-  "sin", "cos", "tan", "asin", "acos", "atan",
-  "log", "ln", "log2", "log10",
-  "exp", "sign",
-  "min", "max",
-]);
-
-const KNOWN_CONSTANTS = new Set(["pi", "e", "tau"]);
-
-// Reserved words that cannot be unit names
-const RESERVED = new Set([
-  ...KNOWN_FUNCTIONS, ...KNOWN_CONSTANTS,
-  "in", "to", "as", "of", "off", "on", "mod",
-]);
-
 function buildBinaryExpr(head, tail) {
   return tail.reduce((left, [, op, , right]) => ({
     type: "binary",
@@ -30,6 +14,34 @@ function buildBinaryExpr(head, tail) {
 
 {
 // Per-parse initializer — has access to `options`
+const KNOWN_FUNCTIONS = options.knownFunctions || new Set([
+  "sqrt", "cbrt", "abs", "ceil", "floor", "round", "trunc",
+  "sin", "cos", "tan", "asin", "acos", "atan",
+  "log", "ln", "log2", "log10",
+  "exp", "sign",
+  "min", "max",
+]);
+
+const KNOWN_CONSTANTS = options.knownConstants || new Set(["pi", "e", "tau"]);
+
+const KNOWN_DATE_LITERALS = options.knownDateLiterals || new Set([
+  "today", "now", "tomorrow", "yesterday",
+]);
+
+const KNOWN_LINE_REFS = options.knownLineRefs || new Set([
+  "sum", "total", "average", "avg", "previous", "prev", "count",
+]);
+
+const KNOWN_BASE_KEYWORDS = options.knownBaseKeywords || new Set([
+  "hexadecimal", "hex", "binary", "bin", "octal", "oct", "decimal", "dec",
+]);
+
+// Reserved words that cannot be unit names
+const RESERVED = new Set([
+  ...KNOWN_FUNCTIONS, ...KNOWN_CONSTANTS,
+  "in", "to", "as", "of", "off", "on", "mod",
+]);
+
 function isUnit(name) {
   if (RESERVED.has(name.toLowerCase())) return false;
   const units = options && options.knownUnits;
@@ -66,8 +78,8 @@ ConversionTarget
   = BaseKeyword / UnitName
 
 BaseKeyword
-  = kw:("hexadecimal" / "hex" / "binary" / "bin" / "octal" / "oct" / "decimal" / "dec")
-    !([a-zA-Z0-9_])
+  = kw:$([a-zA-Z_] [a-zA-Z0-9_]*)
+    &{ return KNOWN_BASE_KEYWORDS.has(kw); }
     { return kw; }
 
 BitwiseOr
@@ -155,13 +167,13 @@ NonKeywordWord
     !{ return ["in","to","as","of","off","on","mod"].includes(word.toLowerCase()); }
 
 DateLiteral
-  = keyword:("today" / "now" / "tomorrow" / "yesterday")
-    !([a-zA-Z0-9_])
+  = keyword:$([a-zA-Z_] [a-zA-Z0-9_]*)
+    &{ return KNOWN_DATE_LITERALS.has(keyword); }
     { return { type: "date", keyword }; }
 
 LineRef
-  = ref:("sum" / "total" / "average" / "avg" / "previous" / "prev" / "count")
-    !([a-zA-Z0-9_])
+  = ref:$([a-zA-Z_] [a-zA-Z0-9_]*)
+    &{ return KNOWN_LINE_REFS.has(ref); }
     { return { type: "lineRef", ref }; }
 
 Constant

@@ -3,8 +3,8 @@ import { EditorState } from "@codemirror/state";
 import { EditorView, keymap, lineNumbers } from "@codemirror/view";
 import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
 
-import { numiAutocompletion } from "../editor/numi-autocomplete";
-import { numiLanguage } from "../editor/numi-language";
+import { numiAutocompletion, invalidateEntityCache } from "../editor/numi-autocomplete";
+import { numiLanguage, updateLanguageSets } from "../editor/numi-language";
 import { darkThemeExtension } from "../editor/numi-theme";
 
 interface EditorPaneProps {
@@ -66,12 +66,27 @@ export function EditorPane({
     const scrollHandler = () => onScrollRef.current(scroller.scrollTop);
     scroller.addEventListener("scroll", scrollHandler, { passive: true });
 
+    // Load initial entity data for dynamic highlighting
+    window.numi.getEntityNames().then((entities) => {
+      updateLanguageSets(view, entities);
+    }).catch(() => {});
+
+    // Listen for entity changes (plugin reload, etc.)
+    window.numi.onEntitiesChanged(() => {
+      invalidateEntityCache();
+      window.numi.getEntityNames().then((entities) => {
+        if (viewRef.current) {
+          updateLanguageSets(viewRef.current, entities);
+        }
+      }).catch(() => {});
+    });
+
     return () => {
       scroller.removeEventListener("scroll", scrollHandler);
       view.destroy();
     };
     // Only run on mount (or when initialContent changes via key prop)
-     
+
   }, [initialContent]);
 
   return (

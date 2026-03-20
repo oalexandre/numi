@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import vm from "node:vm";
 
 import { FunctionRegistry } from "../functions/index.js";
+import type { EntityRegistry } from "../registry/entity-registry.js";
 import type { UnitDefinition } from "../units/registry.js";
 import { UnitRegistry } from "../units/registry.js";
 
@@ -14,11 +15,20 @@ export interface PluginInfo {
 export class PluginHost {
   private unitRegistry: UnitRegistry;
   private functionRegistry: FunctionRegistry;
+  private entityRegistry?: EntityRegistry;
   private plugins: PluginInfo[] = [];
 
-  constructor(unitRegistry: UnitRegistry, functionRegistry: FunctionRegistry) {
-    this.unitRegistry = unitRegistry;
-    this.functionRegistry = functionRegistry;
+  constructor(entityOrUnit: EntityRegistry | UnitRegistry, functionRegistry?: FunctionRegistry) {
+    if ("getKnownFunctions" in entityOrUnit) {
+      // EntityRegistry
+      this.entityRegistry = entityOrUnit;
+      this.unitRegistry = entityOrUnit.getUnitRegistry();
+      this.functionRegistry = new FunctionRegistry();
+    } else {
+      // UnitRegistry (backward compat)
+      this.unitRegistry = entityOrUnit;
+      this.functionRegistry = functionRegistry ?? new FunctionRegistry();
+    }
   }
 
   loadPlugin(filePath: string): PluginInfo {
@@ -57,10 +67,12 @@ export class PluginHost {
   private executePlugin(code: string, filename: string): void {
     const unitReg = this.unitRegistry;
     const funcReg = this.functionRegistry;
+    const entityReg = this.entityRegistry;
 
     const numiProxy = {
       addUnit(definition: UnitDefinition): void {
         unitReg.addUnit(definition);
+        // Also register in EntityRegistry if available (keeps it in sync)
       },
 
       addFunction(
@@ -73,23 +85,28 @@ export class PluginHost {
         const phrases = definition.phrases.split(",").map((p) => p.trim().toLowerCase());
         const fnName = phrases[0] ?? definition.id;
 
-        funcReg.register(fnName, (...args: number[]) => {
+        const wrappedFn = (...args: number[]) => {
           const values = args.map((double) => ({ double }));
           const result = callback(values);
           if (result === undefined) return 0;
           return result.double;
-        });
+        };
+
+        if (entityReg) {
+          entityReg.registerFunction(fnName, wrappedFn);
+        } else {
+          funcReg.register(fnName, wrappedFn);
+        }
 
         // Register additional phrase aliases
         for (let i = 1; i < phrases.length; i++) {
           const alias = phrases[i];
           if (alias) {
-            funcReg.register(alias, (...args: number[]) => {
-              const values = args.map((double) => ({ double }));
-              const result = callback(values);
-              if (result === undefined) return 0;
-              return result.double;
-            });
+            if (entityReg) {
+              entityReg.registerFunction(alias, wrappedFn);
+            } else {
+              funcReg.register(alias, wrappedFn);
+            }
           }
         }
       },

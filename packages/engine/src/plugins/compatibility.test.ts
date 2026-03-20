@@ -11,7 +11,7 @@ import { PluginHost } from "./host.js";
 
 const PLUGINS_DIR = resolve(
   fileURLToPath(import.meta.url),
-  "../../../../../plugins/CommunityExtensions",
+  "../../../../../plugins/CommunityPlugins",
 );
 
 function findPluginJs(dir: string): string | null {

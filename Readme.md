@@ -15,7 +15,7 @@ Ilumi is a notepad-style calculator app for macOS, Windows and Linux. It allows 
 - **Bitwise operations** — `AND`, `OR`, `XOR`, `NOT`, `<<`, `>>`
 - **Line references** — `sum`, `avg`, `prev`, `count`
 - **Multiple notes** — tabbed interface with auto-save
-- **Plugin system** — extend with custom units and functions
+- **Plugin system** — extend with custom units and functions ([guide](docs/plugins.md))
 - **Dark & light themes** — follows system preference or manual toggle
 - **Syntax highlighting** — numbers, variables, functions, units, comments
 

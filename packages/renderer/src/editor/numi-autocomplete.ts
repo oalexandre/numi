@@ -4,57 +4,61 @@ import {
   type CompletionResult,
 } from "@codemirror/autocomplete";
 
-const FUNCTIONS = [
-  { label: "sqrt", detail: "square root" },
-  { label: "cbrt", detail: "cube root" },
-  { label: "abs", detail: "absolute value" },
-  { label: "ceil", detail: "round up" },
-  { label: "floor", detail: "round down" },
-  { label: "round", detail: "round nearest" },
-  { label: "trunc", detail: "truncate decimals" },
-  { label: "sin", detail: "sine" },
-  { label: "cos", detail: "cosine" },
-  { label: "tan", detail: "tangent" },
-  { label: "asin", detail: "arc sine" },
-  { label: "acos", detail: "arc cosine" },
-  { label: "atan", detail: "arc tangent" },
-  { label: "log", detail: "log base 10" },
-  { label: "log2", detail: "log base 2" },
-  { label: "ln", detail: "natural log" },
-  { label: "exp", detail: "e^x" },
-  { label: "min", detail: "minimum" },
-  { label: "max", detail: "maximum" },
-  { label: "sign", detail: "sign (-1, 0, 1)" },
-];
+interface CompletionEntry {
+  label: string;
+  detail?: string;
+  type: string;
+}
 
-const CONSTANTS = [
-  { label: "pi", detail: "3.14159..." },
-  { label: "e", detail: "2.71828..." },
-  { label: "tau", detail: "6.28318..." },
-];
+// Dynamic entity completions (loaded from main process)
+let entityCompletions: CompletionEntry[] = [];
+let entityCompletionsLoaded = false;
 
-const KEYWORDS = [
-  { label: "sum", detail: "sum of lines above" },
-  { label: "avg", detail: "average of lines above" },
-  { label: "total", detail: "alias for sum" },
-  { label: "prev", detail: "previous line result" },
-  { label: "count", detail: "count of lines with values" },
-  { label: "today", detail: "current date" },
-  { label: "tomorrow", detail: "tomorrow's date" },
-  { label: "yesterday", detail: "yesterday's date" },
-  { label: "now", detail: "current date/time" },
-];
-
-const BASE_TARGETS = [
-  { label: "hex", detail: "hexadecimal" },
-  { label: "binary", detail: "binary" },
-  { label: "octal", detail: "octal" },
-  { label: "decimal", detail: "decimal" },
+// Static base targets (always available)
+const BASE_TARGETS: CompletionEntry[] = [
+  { label: "hex", detail: "hexadecimal", type: "keyword" },
+  { label: "binary", detail: "binary", type: "keyword" },
+  { label: "octal", detail: "octal", type: "keyword" },
+  { label: "decimal", detail: "decimal", type: "keyword" },
 ];
 
 // Cache for unit completions
 let allUnitsCache: string[] | null = null;
 const compatibleCache: Map<string, string[]> = new Map();
+
+function mapEntityType(type: string): string {
+  switch (type) {
+    case "function": return "function";
+    case "constant": return "constant";
+    case "lineRef":
+    case "dateLiteral":
+    case "baseConversion": return "keyword";
+    default: return "text";
+  }
+}
+
+async function loadEntityCompletions(): Promise<CompletionEntry[]> {
+  if (entityCompletionsLoaded) return entityCompletions;
+  try {
+    const entities = await window.numi.getEntityNames();
+    entityCompletions = entities.map((e) => ({
+      label: e.name,
+      detail: e.detail,
+      type: mapEntityType(e.type),
+    }));
+    entityCompletionsLoaded = true;
+    return entityCompletions;
+  } catch {
+    return entityCompletions;
+  }
+}
+
+/** Call this when entities change (e.g., after plugin reload). */
+export function invalidateEntityCache(): void {
+  entityCompletionsLoaded = false;
+  allUnitsCache = null;
+  compatibleCache.clear();
+}
 
 async function getAllUnits(): Promise<string[]> {
   if (allUnitsCache) return allUnitsCache;
@@ -96,7 +100,7 @@ async function numiCompletions(context: CompletionContext): Promise<CompletionRe
     const compatible = await getCompatible(sourceUnit);
     const baseOptions = BASE_TARGETS.filter((b) =>
       b.label.startsWith(typed.toLowerCase()),
-    ).map((b) => ({ ...b, type: "keyword" as const }));
+    );
 
     const unitOptions = compatible
       .filter((u) => u.toLowerCase().startsWith(typed.toLowerCase()))
@@ -119,28 +123,16 @@ async function numiCompletions(context: CompletionContext): Promise<CompletionRe
   // If typing but less than 2 chars, only show on explicit Ctrl+Space
   if (word.length === 1 && !context.explicit) return null;
 
-  const allUnits = await getAllUnits();
+  const [entries, allUnits] = await Promise.all([
+    loadEntityCompletions(),
+    getAllUnits(),
+  ]);
 
   const filter = word.toLowerCase();
   const matchesFilter = (label: string) => filter === "" || label.toLowerCase().startsWith(filter);
 
   const options = [
-    ...FUNCTIONS.filter((f) => matchesFilter(f.label)).map((f) => ({
-      ...f,
-      type: "function" as const,
-    })),
-    ...CONSTANTS.filter((c) => matchesFilter(c.label)).map((c) => ({
-      ...c,
-      type: "constant" as const,
-    })),
-    ...KEYWORDS.filter((k) => matchesFilter(k.label)).map((k) => ({
-      ...k,
-      type: "keyword" as const,
-    })),
-    ...BASE_TARGETS.filter((b) => matchesFilter(b.label)).map((b) => ({
-      ...b,
-      type: "keyword" as const,
-    })),
+    ...entries.filter((e) => matchesFilter(e.label)),
     ...allUnits
       .filter((u) => matchesFilter(u) && u.length > 1)
       .slice(0, 20)

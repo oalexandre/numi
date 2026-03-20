@@ -4,6 +4,8 @@ import { evaluateNodeFull } from "./evaluator/index.js";
 import type { EvalOptions } from "./evaluator/index.js";
 import { formatNumber, formatWithUnit } from "./formatter.js";
 import { parse } from "./parser/index.js";
+import type { ParseOptions } from "./parser/index.js";
+import type { EntityRegistry } from "./registry/entity-registry.js";
 import type { UnitRegistry } from "./units/registry.js";
 
 import type { LineResult } from "./index.js";
@@ -69,12 +71,39 @@ export class Document {
   private lines: LineState[] = [];
   private context = new EvalContext();
   private unitRegistry?: UnitRegistry;
-  private knownUnits?: Set<string>;
+  private entityRegistry?: EntityRegistry;
+  private parseOptions: ParseOptions = {};
 
-  constructor(unitRegistry?: UnitRegistry) {
-    this.unitRegistry = unitRegistry;
-    if (unitRegistry) {
-      this.knownUnits = new Set(unitRegistry.getAllPhrases());
+  constructor(registryOrEntity?: UnitRegistry | EntityRegistry) {
+    if (registryOrEntity && "getKnownFunctions" in registryOrEntity) {
+      // EntityRegistry
+      this.entityRegistry = registryOrEntity;
+      this.unitRegistry = registryOrEntity.getUnitRegistry();
+      this.rebuildParseOptions();
+    } else if (registryOrEntity) {
+      // UnitRegistry (backward compat)
+      this.unitRegistry = registryOrEntity;
+      if (registryOrEntity) {
+        this.parseOptions = { knownUnits: new Set(registryOrEntity.getAllPhrases()) };
+      }
+    }
+  }
+
+  /** Rebuild parse options from EntityRegistry (call after plugins are loaded). */
+  refreshParseOptions(): void {
+    this.rebuildParseOptions();
+  }
+
+  private rebuildParseOptions(): void {
+    if (this.entityRegistry) {
+      this.parseOptions = {
+        knownUnits: this.entityRegistry.getKnownUnits(),
+        knownFunctions: this.entityRegistry.getKnownFunctions(),
+        knownConstants: this.entityRegistry.getKnownConstants(),
+        knownDateLiterals: this.entityRegistry.getKnownDateLiterals(),
+        knownLineRefs: this.entityRegistry.getKnownLineRefs(),
+        knownBaseKeywords: this.entityRegistry.getKnownBaseKeywords(),
+      };
     }
   }
 
@@ -105,7 +134,7 @@ export class Document {
     for (const i of dirty) {
       const src = newLines[i] ?? "";
       try {
-        const ast = parse(src, { knownUnits: this.knownUnits });
+        const ast = parse(src, this.parseOptions);
         this.lines[i] = {
           source: src,
           ast,
@@ -156,6 +185,7 @@ export class Document {
 
       const evalOpts: EvalOptions = {
         unitRegistry: this.unitRegistry,
+        entityRegistry: this.entityRegistry,
         previousResults,
         currentLine: i,
       };

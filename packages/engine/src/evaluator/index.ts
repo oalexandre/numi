@@ -1,6 +1,7 @@
 import type { ASTNode } from "../ast.js";
 import { resolveDateLiteral } from "../dates/index.js";
 import { FunctionRegistry, getConstant } from "../functions/index.js";
+import type { EntityRegistry } from "../registry/entity-registry.js";
 import type { UnitRegistry } from "../units/registry.js";
 
 import { EvalContext } from "./context.js";
@@ -21,13 +22,15 @@ export interface EvalResult {
 
 export interface EvalOptions {
   unitRegistry?: UnitRegistry;
+  entityRegistry?: EntityRegistry;
   /** Previous line results (values only) for line reference tokens */
   previousResults?: (number | null)[];
   /** Current line index */
   currentLine?: number;
 }
 
-const funcRegistry = new FunctionRegistry();
+// Module-level fallback for backward compatibility (used when no entityRegistry in options)
+const defaultFuncRegistry = new FunctionRegistry();
 
 export function evaluateNode(
   node: ASTNode,
@@ -42,6 +45,8 @@ export function evaluateNodeFull(
   context: EvalContext,
   options?: EvalOptions,
 ): EvalResult {
+  const entityReg = options?.entityRegistry;
+
   switch (node.type) {
     case "number":
       return { value: node.value };
@@ -53,18 +58,13 @@ export function evaluateNodeFull(
       const targetLower = node.targetUnit.toLowerCase();
 
       // Base conversion: "255 in hex", "0xFF in binary", etc.
-      const baseFormats: Record<string, (n: number) => string> = {
-        hex: (n) => "0x" + Math.trunc(n).toString(16).toUpperCase(),
-        hexadecimal: (n) => "0x" + Math.trunc(n).toString(16).toUpperCase(),
-        binary: (n) => "0b" + (Math.trunc(n) >>> 0).toString(2),
-        bin: (n) => "0b" + (Math.trunc(n) >>> 0).toString(2),
-        octal: (n) => "0o" + Math.trunc(n).toString(8),
-        oct: (n) => "0o" + Math.trunc(n).toString(8),
-        decimal: (n) => String(Math.trunc(n)),
-        dec: (n) => String(Math.trunc(n)),
-      };
+      let baseFormatter: ((n: number) => string) | undefined;
+      if (entityReg) {
+        baseFormatter = entityReg.getBaseFormatter(targetLower);
+      } else {
+        baseFormatter = defaultBaseFormats[targetLower];
+      }
 
-      const baseFormatter = baseFormats[targetLower];
       if (baseFormatter) {
         const inner = evaluateNodeFull(node.value, context, options);
         if (inner.value === null) throw new EvalError("Cannot convert empty value");
@@ -77,7 +77,7 @@ export function evaluateNodeFull(
       if (inner.value === null) {
         throw new EvalError("Cannot convert empty value");
       }
-      const unitReg = options?.unitRegistry;
+      const unitReg = entityReg?.getUnitRegistry() ?? options?.unitRegistry;
       if (!unitReg) {
         throw new EvalError("Unit conversion not available");
       }
@@ -108,7 +108,9 @@ export function evaluateNodeFull(
     }
 
     case "variable": {
-      const constant = getConstant(node.name);
+      const constant = entityReg
+        ? entityReg.getConstantValue(node.name)
+        : getConstant(node.name);
       if (constant !== undefined) {
         return { value: constant };
       }
@@ -127,7 +129,10 @@ export function evaluateNodeFull(
         }
         return val;
       });
-      return { value: funcRegistry.call(node.name, args) };
+      if (entityReg) {
+        return { value: entityReg.callFunction(node.name, args) };
+      }
+      return { value: defaultFuncRegistry.call(node.name, args) };
     }
 
     case "percent": {
@@ -156,35 +161,22 @@ export function evaluateNodeFull(
     }
 
     case "date": {
+      if (entityReg) {
+        const date = entityReg.resolveDateLiteral(node.keyword);
+        return { value: date.getTime() };
+      }
       const date = resolveDateLiteral(node.keyword);
       return { value: date.getTime() };
     }
 
     case "lineRef": {
-      const prev = options?.previousResults ?? [];
-      const currentLine = options?.currentLine ?? prev.length;
-      const above = prev.slice(0, currentLine).filter((v): v is number => v !== null);
-
-      switch (node.ref) {
-        case "sum":
-        case "total":
-          return { value: above.reduce((a, b) => a + b, 0) };
-        case "avg":
-        case "average":
-          return { value: above.length > 0 ? above.reduce((a, b) => a + b, 0) / above.length : 0 };
-        case "prev":
-        case "previous": {
-          for (let i = currentLine - 1; i >= 0; i--) {
-            const val = prev[i];
-            if (val !== null && val !== undefined) return { value: val };
-          }
-          return { value: 0 };
-        }
-        case "count":
-          return { value: above.length };
-        default:
-          throw new EvalError(`Unknown line reference "${node.ref}"`);
+      if (entityReg) {
+        const prev = options?.previousResults ?? [];
+        const currentLine = options?.currentLine ?? prev.length;
+        return { value: entityReg.resolveLineRef(node.ref, prev, currentLine) };
       }
+      // Fallback for backward compatibility
+      return { value: evaluateLineRefFallback(node.ref, options) };
     }
 
     case "comment":
@@ -195,6 +187,46 @@ export function evaluateNodeFull(
       const exhaustive: never = node;
       throw new EvalError(`Unknown node type: ${(exhaustive as ASTNode).type}`);
     }
+  }
+}
+
+// Fallback base formats for when no EntityRegistry is provided
+const defaultBaseFormats: Record<string, (n: number) => string> = {
+  hex: (n) => "0x" + Math.trunc(n).toString(16).toUpperCase(),
+  hexadecimal: (n) => "0x" + Math.trunc(n).toString(16).toUpperCase(),
+  binary: (n) => "0b" + (Math.trunc(n) >>> 0).toString(2),
+  bin: (n) => "0b" + (Math.trunc(n) >>> 0).toString(2),
+  octal: (n) => "0o" + Math.trunc(n).toString(8),
+  oct: (n) => "0o" + Math.trunc(n).toString(8),
+  decimal: (n) => String(Math.trunc(n)),
+  dec: (n) => String(Math.trunc(n)),
+};
+
+// Fallback line ref evaluation for backward compatibility
+function evaluateLineRefFallback(ref: string, options?: EvalOptions): number {
+  const prev = options?.previousResults ?? [];
+  const currentLine = options?.currentLine ?? prev.length;
+  const above = prev.slice(0, currentLine).filter((v): v is number => v !== null);
+
+  switch (ref) {
+    case "sum":
+    case "total":
+      return above.reduce((a, b) => a + b, 0);
+    case "avg":
+    case "average":
+      return above.length > 0 ? above.reduce((a, b) => a + b, 0) / above.length : 0;
+    case "prev":
+    case "previous": {
+      for (let i = currentLine - 1; i >= 0; i--) {
+        const val = prev[i];
+        if (val !== null && val !== undefined) return val;
+      }
+      return 0;
+    }
+    case "count":
+      return above.length;
+    default:
+      throw new EvalError(`Unknown line reference "${ref}"`);
   }
 }
 

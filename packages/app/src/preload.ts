@@ -1,5 +1,6 @@
 import { contextBridge, ipcRenderer } from "electron";
 import type { LineResult } from "@engine/index";
+import type { EntityInfo } from "@engine/index";
 
 export const ilumiApi = {
   evaluate: (document: string): Promise<LineResult[]> => {
@@ -10,6 +11,9 @@ export const ilumiApi = {
   },
   getAllUnits: (): Promise<string[]> => {
     return ipcRenderer.invoke("numi:getAllUnits");
+  },
+  getEntityNames: (): Promise<EntityInfo[]> => {
+    return ipcRenderer.invoke("numi:getEntityNames");
   },
   getTheme: (): Promise<"dark" | "light"> => {
     return ipcRenderer.invoke("numi:getTheme");
@@ -36,6 +40,9 @@ export const ilumiApi = {
     ipcRenderer.on("numi:themeChanged", (_event, theme: "dark" | "light") => {
       callback(theme);
     });
+  },
+  onEntitiesChanged: (callback: () => void): void => {
+    ipcRenderer.on("numi:entitiesChanged", callback);
   },
   onNewNote: (callback: () => void): void => {
     ipcRenderer.on("numi:newNote", callback);
