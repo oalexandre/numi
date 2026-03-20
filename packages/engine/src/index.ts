@@ -1,3 +1,6 @@
+export type { ASTNode } from "./ast.js";
+export { parse } from "./parser/index.js";
+
 export interface LineResult {
   line: number;
   value: number | null;
