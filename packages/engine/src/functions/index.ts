@@ -52,8 +52,16 @@ export class FunctionRegistry {
     return fn(...args);
   }
 
+  register(name: string, fn: MathFn): void {
+    this.functions.set(name, fn);
+  }
+
   has(name: string): boolean {
     return this.functions.has(name);
+  }
+
+  getAllNames(): string[] {
+    return [...this.functions.keys()];
   }
 }
 
