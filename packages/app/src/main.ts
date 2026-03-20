@@ -1,6 +1,6 @@
 import { join, resolve } from "node:path";
 
-import { app, BrowserWindow, ipcMain } from "electron";
+import { app, BrowserWindow, ipcMain, nativeTheme } from "electron";
 import {
   Document,
   createDefaultRegistry,
@@ -8,6 +8,8 @@ import {
   PluginHost,
   PluginLoader,
 } from "@engine/index";
+
+import { loadSettings, saveSetting } from "./settings.js";
 
 const isDev = !app.isPackaged;
 const unitRegistry = createDefaultRegistry();
@@ -19,6 +21,12 @@ const pluginLoader = new PluginLoader(pluginHost, {
 const doc = new Document(unitRegistry);
 
 let mainWindow: BrowserWindow | null = null;
+
+function getEffectiveTheme(): "dark" | "light" {
+  const settings = loadSettings();
+  if (settings.theme === "dark" || settings.theme === "light") return settings.theme;
+  return nativeTheme.shouldUseDarkColors ? "dark" : "light";
+}
 
 function createWindow(): void {
   mainWindow = new BrowserWindow({
@@ -37,7 +45,34 @@ function createWindow(): void {
     return doc.update(source);
   });
 
-  // Hot-reload plugins on window focus
+  ipcMain.handle("numi:getTheme", () => {
+    return getEffectiveTheme();
+  });
+
+  ipcMain.handle("numi:setTheme", (_event, theme: "auto" | "dark" | "light") => {
+    saveSetting("theme", theme);
+    const effective = getEffectiveTheme();
+    mainWindow?.webContents.send("numi:themeChanged", effective);
+    return effective;
+  });
+
+  ipcMain.handle("numi:toggleTheme", () => {
+    const current = getEffectiveTheme();
+    const next = current === "dark" ? "light" : "dark";
+    saveSetting("theme", next);
+    mainWindow?.webContents.send("numi:themeChanged", next);
+    return next;
+  });
+
+  // Listen for OS theme changes
+  nativeTheme.on("updated", () => {
+    const settings = loadSettings();
+    if (settings.theme === "auto" || !settings.theme) {
+      const effective = getEffectiveTheme();
+      mainWindow?.webContents.send("numi:themeChanged", effective);
+    }
+  });
+
   mainWindow.on("focus", () => {
     pluginLoader.reload();
   });
@@ -50,9 +85,7 @@ function createWindow(): void {
 }
 
 app.whenReady().then(() => {
-  // Load plugins on startup
   pluginLoader.loadAll();
-
   createWindow();
 
   app.on("activate", () => {

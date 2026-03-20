@@ -1,27 +1,36 @@
 @import "tailwindcss";
 
-:root {
+:root,
+[data-theme="dark"] {
   --bg-primary: #1e1e2e;
   --bg-editor: #1e1e2e;
   --bg-results: #181825;
   --text-primary: #cdd6f4;
   --text-result: #a6e3a1;
   --text-error: #f38ba8;
+  --text-muted: #546e7a;
   --border: #313244;
   --accent: #89b4fa;
+  --hover: rgba(255, 255, 255, 0.05);
+  --selection: rgba(137, 180, 250, 0.2);
+  --active-line: rgba(255, 255, 255, 0.03);
+  color-scheme: dark;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    --bg-primary: #ffffff;
-    --bg-editor: #ffffff;
-    --bg-results: #f8fafc;
-    --text-primary: #1e293b;
-    --text-result: #16a34a;
-    --text-error: #dc2626;
-    --border: #e2e8f0;
-    --accent: #2563eb;
-  }
+[data-theme="light"] {
+  --bg-primary: #ffffff;
+  --bg-editor: #ffffff;
+  --bg-results: #f8fafc;
+  --text-primary: #1e293b;
+  --text-result: #16a34a;
+  --text-error: #dc2626;
+  --text-muted: #9ca3af;
+  --border: #e2e8f0;
+  --accent: #2563eb;
+  --hover: rgba(0, 0, 0, 0.04);
+  --selection: rgba(37, 99, 235, 0.15);
+  --active-line: rgba(0, 0, 0, 0.02);
+  color-scheme: light;
 }
 
 * {
@@ -43,6 +52,9 @@ body {
     monospace;
   font-size: 14px;
   overflow: hidden;
+  transition:
+    background 0.2s,
+    color 0.2s;
 }
 
 .cm-editor {
@@ -59,6 +71,7 @@ body {
 
 .cm-editor .cm-content {
   padding: 16px 16px 50vh 16px !important;
+  caret-color: var(--text-primary) !important;
 }
 
 .cm-editor .cm-gutters {
@@ -66,13 +79,17 @@ body {
 }
 
 .cm-editor .cm-activeLine {
-  background: rgba(255, 255, 255, 0.03) !important;
+  background: var(--active-line) !important;
 }
 
 .cm-editor .cm-selectionBackground {
-  background: rgba(137, 180, 250, 0.2) !important;
+  background: var(--selection) !important;
 }
 
 .cm-editor.cm-focused {
   outline: none !important;
+}
+
+.cm-editor .cm-cursor {
+  border-left-color: var(--text-primary) !important;
 }

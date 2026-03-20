@@ -3,8 +3,10 @@ import { useState, useCallback } from "react";
 import { EditorPane } from "./components/editor-pane";
 import { ResultsPane } from "./components/results-pane";
 import { useEngine } from "./hooks/use-engine";
+import { useTheme } from "./hooks/use-theme";
 
 export function App(): React.JSX.Element {
+  useTheme();
   const { results, evaluate } = useEngine();
   const [scrollTop, setScrollTop] = useState(0);
 
