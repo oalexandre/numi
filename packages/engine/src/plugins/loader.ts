@@ -4,7 +4,7 @@ import { homedir } from "node:os";
 
 import type { PluginHost, PluginInfo } from "./host.js";
 
-const USER_PLUGINS_DIR = join(homedir(), ".numi-calc", "plugins");
+const USER_PLUGINS_DIR = join(homedir(), ".ilumi-calc", "plugins");
 
 export interface PluginLoaderOptions {
   builtInDir?: string;

@@ -6,7 +6,7 @@ interface NoteData {
   content: string;
 }
 
-interface NumiApi {
+interface IlumiApi {
   evaluate: (document: string) => Promise<LineResult[]>;
   getCompletions: (unitPhrase: string) => Promise<string[]>;
   getAllUnits: () => Promise<string[]>;
@@ -27,6 +27,6 @@ interface NumiApi {
 
 declare global {
   interface Window {
-    numi: NumiApi;
+    numi: IlumiApi;
   }
 }

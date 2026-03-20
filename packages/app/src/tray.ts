@@ -30,7 +30,7 @@ export function createTray(getWindow: () => BrowserWindow | null): void {
   }
 
   tray = new Tray(icon);
-  tray.setToolTip("Numi Calculator");
+  tray.setToolTip("Ilumi Calculator");
 
   const contextMenu = Menu.buildFromTemplate([
     {

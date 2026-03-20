@@ -1,7 +1,7 @@
 import { contextBridge, ipcRenderer } from "electron";
 import type { LineResult } from "@engine/index";
 
-export const numiApi = {
+export const ilumiApi = {
   evaluate: (document: string): Promise<LineResult[]> => {
     return ipcRenderer.invoke("numi:evaluate", document);
   },
@@ -54,4 +54,4 @@ export const numiApi = {
   },
 };
 
-contextBridge.exposeInMainWorld("numi", numiApi);
+contextBridge.exposeInMainWorld("numi", ilumiApi);

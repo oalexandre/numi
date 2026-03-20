@@ -1,25 +1,23 @@
-# Numi
+# Ilumi
 
-[Numi](https://numi.app) is a handy calculator app for macOS. It allows you to describe tasks naturally and instantly get an answer. For example, `$20 in euro - 5% discount` or `today + 2 weeks`.
+Ilumi is a notepad-style calculator app for macOS, Windows and Linux. It allows you to describe tasks naturally and instantly get an answer. For example, `$20 in euro - 5% discount` or `today + 2 weeks`.
 
-![](https://numi.app/images/numi-screenshot-yellow.png)
+## Features
 
-## Installation
-
-Desktop version for macOS can be downloaded from the [app website](https://numi.app) or from releases page on GitHub.
-
-- [Numi for MacOS](https://cdn.numi.app/mac-v3/Numi.dmg)
-- [Numi for Windows](https://cdn.numi.app/electron/latest/numi-setup.exe)
-
-Terminal version can be installed using provided shell command (same command used to update binary).
-
-```
-curl -sSL https://s.numi.app/cli | sh
-```
-
-Alternative way of installing using [Homebrew](https://brew.sh/): `brew install nikolaeu/numi/numi-cli`.
-
-Alfred extension can be [downloaded](https://cdn.numi.app/extensions/numi.alfredworkflow) directly, requires terminal version to work.
+- **Natural expressions** — type math as you think: `price = 100`, `price + 8% tax`
+- **Variables** — assign and reuse values across lines
+- **Unit conversions** — `5 km to miles`, `100 celsius to fahrenheit`, `32 px to rem`
+- **Percentages** — `100 + 5%`, `10% off 50`, `5% of 200`
+- **Math functions** — `sqrt(16)`, `sin(pi/2)`, `log(100)`, `min(3,1,2)`
+- **Currency conversion** — `$20 in EUR` with live exchange rates
+- **Date arithmetic** — `today + 2 weeks`, duration conversions
+- **Base conversion** — `255 in hex`, `0xFF in binary`
+- **Bitwise operations** — `AND`, `OR`, `XOR`, `NOT`, `<<`, `>>`
+- **Line references** — `sum`, `avg`, `prev`, `count`
+- **Multiple notes** — tabbed interface with auto-save
+- **Plugin system** — extend with custom units and functions
+- **Dark & light themes** — follows system preference or manual toggle
+- **Syntax highlighting** — numbers, variables, functions, units, comments
 
 ## Development
 
@@ -32,7 +30,7 @@ Alfred extension can be [downloaded](https://cdn.numi.app/extensions/numi.alfred
 
 ```bash
 git clone <repo-url>
-cd numi
+cd ilumi
 pnpm install
 ```
 
@@ -52,6 +50,9 @@ pnpm test
 
 # Run tests in watch mode (re-runs on file changes)
 pnpm test:watch
+
+# Run E2E tests (builds first, then launches Electron)
+pnpm test:e2e
 ```
 
 ### Other useful commands
@@ -83,21 +84,27 @@ packages/
   engine/     # Parser, evaluator, units, plugins (pure TS, zero Electron deps)
   app/        # Electron main process + preload
   renderer/   # React UI (CodeMirror 6 + results pane)
-plugins/      # Community plugins (Numi-compatible)
+plugins/      # Community plugins
 ```
 
-## Usage
+## Tech Stack
 
-Terminal version can be used this way:
+| Layer | Technology |
+|-------|-----------|
+| Shell | Electron |
+| UI | React + TypeScript |
+| Editor | CodeMirror 6 |
+| State | Zustand |
+| Styling | Tailwind CSS 4 |
+| Parser | Peggy (PEG) |
+| Build | electron-vite |
+| Tests | Vitest + Playwright |
+| Monorepo | pnpm workspaces |
 
-`numi-cli "20 inches in cm"`
+## License
 
-Most features of the Numi for macOS are supported in terminal. However, these are the features that **have not yet been implemented**:
+See [LICENSE](license.txt).
 
-- ~Localization support~
-- ~Tokens (sum, prev, avg)~
-- ~Dates~
-- Timezone conversion
-- CSS
-- Variables
-- Plugins/extension
+---
+
+*Ilumi is inspired by [Numi](https://numi.app) and is compatible with Numi community plugins.*

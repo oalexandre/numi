@@ -93,7 +93,7 @@ importers:
 
   packages/app:
     dependencies:
-      '@numi/engine':
+      '@ilumi/engine':
         specifier: workspace:*
         version: link:../engine
 
@@ -101,7 +101,7 @@ importers:
 
   packages/renderer:
     dependencies:
-      '@numi/engine':
+      '@ilumi/engine':
         specifier: workspace:*
         version: link:../engine
 

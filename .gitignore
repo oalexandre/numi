@@ -1,8 +1,6 @@
 # macOS
 .DS_Store
 
-*.alfredworkflow
-
 # Dependencies
 node_modules/
 
@@ -51,3 +49,4 @@ pnpm-debug.log*
 CLAUDE.md
 backlog/
 planoFaturamento/
+test-results/

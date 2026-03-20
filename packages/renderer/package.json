@@ -1,5 +1,5 @@
 {
-  "name": "@numi/renderer",
+  "name": "@ilumi/renderer",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -8,6 +8,6 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@numi/engine": "workspace:*"
+    "@ilumi/engine": "workspace:*"
   }
 }
