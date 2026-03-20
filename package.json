@@ -14,9 +14,11 @@
     "format:check": "prettier --check .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "typecheck": "pnpm -r run typecheck"
+    "typecheck": "pnpm -r run typecheck",
+    "test:e2e": "pnpm build && npx playwright test"
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.2",
     "@types/node": "^25.5.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
@@ -29,6 +31,7 @@
     "eslint-config-prettier": "^10.0.1",
     "eslint-plugin-import-x": "^4.6.1",
     "peggy": "^5.1.0",
+    "playwright": "^1.58.2",
     "prettier": "^3.4.2",
     "typescript": "^5.7.3",
     "vitest": "^3.0.4"
