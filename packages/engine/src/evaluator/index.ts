@@ -57,6 +57,31 @@ export function evaluateNode(node: ASTNode, context: EvalContext): number | null
       return registry.call(node.name, args);
     }
 
+    case "percent": {
+      const value = evaluateNode(node.value, context);
+      if (value === null) {
+        throw new EvalError("Cannot apply percent to empty value");
+      }
+      return value / 100;
+    }
+
+    case "percentOp": {
+      const base = evaluateNode(node.base, context);
+      const target = evaluateNode(node.target, context);
+      if (base === null || target === null) {
+        throw new EvalError("Cannot apply percent operation to empty value");
+      }
+      const pct = base / 100;
+      switch (node.op) {
+        case "of":
+          return pct * target;
+        case "off":
+          return target - pct * target;
+        case "on":
+          return target + pct * target;
+      }
+    }
+
     case "comment":
     case "empty":
       return null;
@@ -74,6 +99,17 @@ function evaluateBinary(
   right: ASTNode,
   context: EvalContext,
 ): number {
+  // Special case: 100 + 5% means 100 * 1.05, 100 - 5% means 100 * 0.95
+  if ((op === "+" || op === "-") && right.type === "percent") {
+    const l = evaluateNode(left, context);
+    const pctValue = evaluateNode(right.value, context);
+    if (l === null || pctValue === null) {
+      throw new EvalError("Cannot perform operation on empty value");
+    }
+    const pct = pctValue / 100;
+    return op === "+" ? l * (1 + pct) : l * (1 - pct);
+  }
+
   const l = evaluateNode(left, context);
   const r = evaluateNode(right, context);
 

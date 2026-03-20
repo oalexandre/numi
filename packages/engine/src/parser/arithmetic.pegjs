@@ -1,5 +1,5 @@
 // Numi Calculator — Arithmetic Grammar
-// Covers: +, -, *, /, ^, mod, parentheses, unary, numbers, functions, constants, assignments, variables
+// Covers: +, -, *, /, ^, mod, parentheses, unary, numbers, functions, constants, percentages, assignments, variables
 
 {{
 const KNOWN_FUNCTIONS = new Set([
@@ -55,8 +55,19 @@ Power
   / Unary
 
 Unary
-  = op:("-" / "+") _ expr:Primary
+  = op:("-" / "+") _ expr:Postfix
     { return { type: "unary", op, value: expr }; }
+  / Postfix
+
+Postfix
+  = base:Primary _ "%" _ "off" __ target:Primary
+    { return { type: "percentOp", op: "off", base, target }; }
+  / base:Primary _ "%" _ "on" __ target:Primary
+    { return { type: "percentOp", op: "on", base, target }; }
+  / base:Primary _ "%" _ "of" __ target:Primary
+    { return { type: "percentOp", op: "of", base, target }; }
+  / expr:Primary _ "%"
+    { return { type: "percent", value: expr }; }
   / Primary
 
 Primary

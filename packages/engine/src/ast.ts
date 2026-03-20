@@ -6,7 +6,9 @@ export type ASTNode =
   | BinaryNode
   | UnaryNode
   | VariableNode
-  | CallNode;
+  | CallNode
+  | PercentNode
+  | PercentOpNode;
 
 export interface EmptyNode {
   type: "empty";
@@ -50,4 +52,16 @@ export interface CallNode {
   type: "call";
   name: string;
   args: ASTNode[];
+}
+
+export interface PercentNode {
+  type: "percent";
+  value: ASTNode;
+}
+
+export interface PercentOpNode {
+  type: "percentOp";
+  op: "of" | "off" | "on";
+  base: ASTNode;
+  target: ASTNode;
 }

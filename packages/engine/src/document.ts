@@ -34,6 +34,13 @@ function collectVariableRefs(node: ASTNode): Set<string> {
       case "call":
         n.args.forEach(walk);
         break;
+      case "percent":
+        walk(n.value);
+        break;
+      case "percentOp":
+        walk(n.base);
+        walk(n.target);
+        break;
       case "number":
       case "comment":
       case "empty":
