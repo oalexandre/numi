@@ -1,6 +1,8 @@
 import { useRef, useEffect } from "react";
 import type { LineResult } from "@engine/index";
 
+import { ResultLine } from "./result-line";
+
 interface ResultsPaneProps {
   results: LineResult[];
   scrollTop: number;
@@ -26,30 +28,7 @@ export function ResultsPane({ results, scrollTop }: ResultsPaneProps): React.JSX
     >
       <div style={{ padding: "16px", paddingBottom: "50vh" }}>
         {results.map((result) => (
-          <div
-            key={result.line}
-            className="cursor-pointer select-none"
-            style={{
-              lineHeight: "1.6",
-              minHeight: "1.6em",
-              textAlign: "right",
-              paddingRight: "8px",
-            }}
-            title={result.formatted || undefined}
-            onClick={() => {
-              if (result.formatted) {
-                navigator.clipboard.writeText(result.formatted);
-              }
-            }}
-          >
-            {result.error ? (
-              <span style={{ color: "var(--text-error)", fontSize: "12px", opacity: 0.7 }}>
-                {result.error}
-              </span>
-            ) : (
-              <span style={{ color: "var(--text-result)" }}>{result.formatted}</span>
-            )}
-          </div>
+          <ResultLine key={result.line} result={result} />
         ))}
       </div>
     </div>
