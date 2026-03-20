@@ -1,7 +1,17 @@
 // Numi Calculator — Arithmetic Grammar
-// Covers: +, -, *, /, ^, mod, parentheses, unary, numbers, assignments, variables
+// Covers: +, -, *, /, ^, mod, parentheses, unary, numbers, functions, constants, assignments, variables
 
 {{
+const KNOWN_FUNCTIONS = new Set([
+  "sqrt", "cbrt", "abs", "ceil", "floor", "round", "trunc",
+  "sin", "cos", "tan", "asin", "acos", "atan",
+  "log", "ln", "log2", "log10",
+  "exp", "sign",
+  "min", "max",
+]);
+
+const KNOWN_CONSTANTS = new Set(["pi", "e", "tau"]);
+
 function buildBinaryExpr(head, tail) {
   return tail.reduce((left, [, op, , right]) => ({
     type: "binary",
@@ -20,7 +30,7 @@ Comment
   / "#" rest:$(.*)   { return { type: "comment", text: rest.trim() }; }
 
 Assignment
-  = name:Identifier _ "=" _ expr:Expression
+  = name:Identifier !{ return KNOWN_CONSTANTS.has(name) || KNOWN_FUNCTIONS.has(name); } _ "=" _ expr:Expression
     { return { type: "assignment", name, value: expr }; }
 
 Empty
@@ -50,7 +60,29 @@ Unary
   / Primary
 
 Primary
-  = ParenExpr / Number / Variable
+  = FunctionCallParens / FunctionCallSpace / ParenExpr / Number / Constant / Variable
+
+FunctionCallParens
+  = name:FunctionName "(" _ args:ArgList _ ")"
+    { return { type: "call", name, args }; }
+
+FunctionCallSpace
+  = name:FunctionName __ arg:Primary
+    { return { type: "call", name, args: [arg] }; }
+
+ArgList
+  = head:Expression tail:(_ "," _ Expression)*
+    { return [head, ...tail.map(t => t[3])]; }
+
+FunctionName
+  = name:$([a-zA-Z_] [a-zA-Z0-9_]*)
+    &{ return KNOWN_FUNCTIONS.has(name); }
+    { return name; }
+
+Constant
+  = name:$([a-zA-Z_] [a-zA-Z0-9_]*)
+    &{ return KNOWN_CONSTANTS.has(name); }
+    { return { type: "variable", name }; }
 
 ParenExpr
   = "(" _ expr:Expression _ ")"  { return expr; }
@@ -91,3 +123,4 @@ Identifier
 
 // === WHITESPACE ===
 _ = [ \t]*
+__ = [ \t]+

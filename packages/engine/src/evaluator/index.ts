@@ -1,4 +1,5 @@
 import type { ASTNode } from "../ast.js";
+import { FunctionRegistry, getConstant } from "../functions/index.js";
 
 import { EvalContext } from "./context.js";
 
@@ -10,6 +11,8 @@ export class EvalError extends Error {
     this.name = "EvalError";
   }
 }
+
+const registry = new FunctionRegistry();
 
 export function evaluateNode(node: ASTNode, context: EvalContext): number | null {
   switch (node.type) {
@@ -32,11 +35,26 @@ export function evaluateNode(node: ASTNode, context: EvalContext): number | null
     }
 
     case "variable": {
+      const constant = getConstant(node.name);
+      if (constant !== undefined) {
+        return constant;
+      }
       const value = context.get(node.name);
       if (value === undefined) {
         throw new EvalError(`Undefined variable "${node.name}"`);
       }
       return value;
+    }
+
+    case "call": {
+      const args = node.args.map((arg) => {
+        const val = evaluateNode(arg, context);
+        if (val === null) {
+          throw new EvalError(`Cannot pass empty value to function "${node.name}"`);
+        }
+        return val;
+      });
+      return registry.call(node.name, args);
     }
 
     case "comment":

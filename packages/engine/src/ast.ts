@@ -5,7 +5,8 @@ export type ASTNode =
   | NumberNode
   | BinaryNode
   | UnaryNode
-  | VariableNode;
+  | VariableNode
+  | CallNode;
 
 export interface EmptyNode {
   type: "empty";
@@ -43,4 +44,10 @@ export interface UnaryNode {
 export interface VariableNode {
   type: "variable";
   name: string;
+}
+
+export interface CallNode {
+  type: "call";
+  name: string;
+  args: ASTNode[];
 }
