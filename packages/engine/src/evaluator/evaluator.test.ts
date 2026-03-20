@@ -127,8 +127,8 @@ describe("evaluator", () => {
     });
 
     it("should assign expression results", () => {
-      evalExpr("total = 10 + 20 * 3", context);
-      expect(evalExpr("total", context)).toBe(70);
+      evalExpr("result = 10 + 20 * 3", context);
+      expect(evalExpr("result", context)).toBe(70);
     });
 
     it("should throw on undefined variable", () => {

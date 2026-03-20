@@ -50,6 +50,7 @@ function collectVariableRefs(node: ASTNode): Set<string> {
       case "number":
       case "numberWithUnit":
       case "date":
+      case "lineRef":
       case "comment":
       case "empty":
         break;
@@ -142,12 +143,18 @@ export class Document {
       }
     }
 
-    const evalOpts: EvalOptions = { unitRegistry: this.unitRegistry };
+    const previousResults: (number | null)[] = new Array(this.lines.length).fill(null);
 
     this.context.clear();
     for (let i = 0; i < this.lines.length; i++) {
       const line = this.lines[i];
       if (!line || !line.ast) continue;
+
+      const evalOpts: EvalOptions = {
+        unitRegistry: this.unitRegistry,
+        previousResults,
+        currentLine: i,
+      };
 
       try {
         const result = evaluateNodeFull(line.ast, this.context, evalOpts);
@@ -161,6 +168,7 @@ export class Document {
                 : formatNumber(result.value)
               : "",
         };
+        previousResults[i] = result.value;
       } catch (err) {
         const message = err instanceof Error ? err.message : "Unknown error";
         line.result = {

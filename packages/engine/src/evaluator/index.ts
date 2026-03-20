@@ -21,6 +21,10 @@ export interface EvalResult {
 
 export interface EvalOptions {
   unitRegistry?: UnitRegistry;
+  /** Previous line results (values only) for line reference tokens */
+  previousResults?: (number | null)[];
+  /** Current line index */
+  currentLine?: number;
 }
 
 const funcRegistry = new FunctionRegistry();
@@ -131,6 +135,33 @@ export function evaluateNodeFull(
     case "date": {
       const date = resolveDateLiteral(node.keyword);
       return { value: date.getTime() };
+    }
+
+    case "lineRef": {
+      const prev = options?.previousResults ?? [];
+      const currentLine = options?.currentLine ?? prev.length;
+      const above = prev.slice(0, currentLine).filter((v): v is number => v !== null);
+
+      switch (node.ref) {
+        case "sum":
+        case "total":
+          return { value: above.reduce((a, b) => a + b, 0) };
+        case "avg":
+        case "average":
+          return { value: above.length > 0 ? above.reduce((a, b) => a + b, 0) / above.length : 0 };
+        case "prev":
+        case "previous": {
+          for (let i = currentLine - 1; i >= 0; i--) {
+            const val = prev[i];
+            if (val !== null && val !== undefined) return { value: val };
+          }
+          return { value: 0 };
+        }
+        case "count":
+          return { value: above.length };
+        default:
+          throw new EvalError(`Unknown line reference "${node.ref}"`);
+      }
     }
 
     case "comment":

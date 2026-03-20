@@ -92,7 +92,7 @@ Postfix
   / Primary
 
 Primary
-  = FunctionCallParens / FunctionCallSpace / ParenExpr / UnitConversion / NumberWithUnit / Number / DateLiteral / Constant / Variable
+  = FunctionCallParens / FunctionCallSpace / ParenExpr / UnitConversion / NumberWithUnit / Number / DateLiteral / LineRef / Constant / Variable
 
 UnitConversion
   = n:Number __ fromUnit:UnitName __ ("in" / "to" / "as") __ toUnit:UnitName
@@ -132,6 +132,11 @@ DateLiteral
   = keyword:("today" / "now" / "tomorrow" / "yesterday")
     !([a-zA-Z0-9_])
     { return { type: "date", keyword }; }
+
+LineRef
+  = ref:("sum" / "total" / "average" / "avg" / "previous" / "prev" / "count")
+    !([a-zA-Z0-9_])
+    { return { type: "lineRef", ref }; }
 
 Constant
   = name:$([a-zA-Z_] [a-zA-Z0-9_]*)
