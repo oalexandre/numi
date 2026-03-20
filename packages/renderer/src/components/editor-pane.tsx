@@ -4,11 +4,16 @@ import { EditorView, keymap, lineNumbers } from "@codemirror/view";
 import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
 
 interface EditorPaneProps {
+  initialContent?: string;
   onChange: (text: string) => void;
   onScroll: (scrollTop: number) => void;
 }
 
-export function EditorPane({ onChange, onScroll }: EditorPaneProps): React.JSX.Element {
+export function EditorPane({
+  initialContent = "",
+  onChange,
+  onScroll,
+}: EditorPaneProps): React.JSX.Element {
   const containerRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<EditorView | null>(null);
 
@@ -27,7 +32,7 @@ export function EditorPane({ onChange, onScroll }: EditorPaneProps): React.JSX.E
     if (!containerRef.current) return;
 
     const state = EditorState.create({
-      doc: "",
+      doc: initialContent,
       extensions: [
         lineNumbers(),
         history(),
@@ -47,6 +52,11 @@ export function EditorPane({ onChange, onScroll }: EditorPaneProps): React.JSX.E
 
     viewRef.current = view;
 
+    // Trigger initial evaluation
+    if (initialContent) {
+      onChange(initialContent);
+    }
+
     const scroller = view.scrollDOM;
     const scrollHandler = () => onScroll(scroller.scrollTop);
     scroller.addEventListener("scroll", scrollHandler, { passive: true });
@@ -55,7 +65,7 @@ export function EditorPane({ onChange, onScroll }: EditorPaneProps): React.JSX.E
       scroller.removeEventListener("scroll", scrollHandler);
       view.destroy();
     };
-  }, [handleUpdate, onScroll]);
+  }, [handleUpdate, onScroll, initialContent, onChange]);
 
   return (
     <div

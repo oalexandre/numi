@@ -9,6 +9,8 @@ import {
   PluginLoader,
 } from "@engine/index";
 
+import { loadAllNotes, saveNote, deleteNote, generateId } from "./notes.js";
+import type { NoteData } from "./notes.js";
 import { loadSettings, saveSetting } from "./settings.js";
 
 const isDev = !app.isPackaged;
@@ -54,6 +56,24 @@ function createWindow(): void {
     const effective = getEffectiveTheme();
     mainWindow?.webContents.send("numi:themeChanged", effective);
     return effective;
+  });
+
+  ipcMain.handle("numi:getNotes", () => {
+    return loadAllNotes();
+  });
+
+  ipcMain.handle("numi:saveNote", (_event, note: NoteData) => {
+    saveNote(note);
+  });
+
+  ipcMain.handle("numi:createNote", () => {
+    const note: NoteData = { id: generateId(), title: "Untitled", content: "" };
+    saveNote(note);
+    return note;
+  });
+
+  ipcMain.handle("numi:deleteNote", (_event, id: string) => {
+    deleteNote(id);
   });
 
   ipcMain.handle("numi:toggleTheme", () => {

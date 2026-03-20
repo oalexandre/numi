@@ -14,6 +14,18 @@ export const numiApi = {
   toggleTheme: (): Promise<"dark" | "light"> => {
     return ipcRenderer.invoke("numi:toggleTheme");
   },
+  getNotes: (): Promise<Array<{ id: string; title: string; content: string }>> => {
+    return ipcRenderer.invoke("numi:getNotes");
+  },
+  saveNote: (note: { id: string; title: string; content: string }): Promise<void> => {
+    return ipcRenderer.invoke("numi:saveNote", note);
+  },
+  createNote: (): Promise<{ id: string; title: string; content: string }> => {
+    return ipcRenderer.invoke("numi:createNote");
+  },
+  deleteNote: (id: string): Promise<void> => {
+    return ipcRenderer.invoke("numi:deleteNote", id);
+  },
   onThemeChanged: (callback: (theme: "dark" | "light") => void): void => {
     ipcRenderer.on("numi:themeChanged", (_event, theme: "dark" | "light") => {
       callback(theme);
