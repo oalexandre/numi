@@ -1,10 +1,9 @@
 import { readFileSync } from "node:fs";
 import vm from "node:vm";
 
-import { FunctionRegistry } from "../functions/index.js";
+import type { PluginTest } from "../core-plugins/types.js";
 import type { EntityRegistry } from "../registry/entity-registry.js";
 import type { UnitDefinition } from "../units/registry.js";
-import { UnitRegistry } from "../units/registry.js";
 
 export interface PluginInfo {
   path: string;
@@ -13,22 +12,12 @@ export interface PluginInfo {
 }
 
 export class PluginHost {
-  private unitRegistry: UnitRegistry;
-  private functionRegistry: FunctionRegistry;
-  private entityRegistry?: EntityRegistry;
+  private entityRegistry: EntityRegistry;
   private plugins: PluginInfo[] = [];
+  private communityTests: PluginTest[] = [];
 
-  constructor(entityOrUnit: EntityRegistry | UnitRegistry, functionRegistry?: FunctionRegistry) {
-    if ("getKnownFunctions" in entityOrUnit) {
-      // EntityRegistry
-      this.entityRegistry = entityOrUnit;
-      this.unitRegistry = entityOrUnit.getUnitRegistry();
-      this.functionRegistry = new FunctionRegistry();
-    } else {
-      // UnitRegistry (backward compat)
-      this.unitRegistry = entityOrUnit;
-      this.functionRegistry = functionRegistry ?? new FunctionRegistry();
-    }
+  constructor(entityRegistry: EntityRegistry) {
+    this.entityRegistry = entityRegistry;
   }
 
   loadPlugin(filePath: string): PluginInfo {
@@ -64,15 +53,18 @@ export class PluginHost {
     return [...this.plugins];
   }
 
+  /** Get all test cases registered by community plugins via numi.addTest(). */
+  getCommunityTests(): PluginTest[] {
+    return [...this.communityTests];
+  }
+
   private executePlugin(code: string, filename: string): void {
-    const unitReg = this.unitRegistry;
-    const funcReg = this.functionRegistry;
     const entityReg = this.entityRegistry;
+    const tests = this.communityTests;
 
     const numiProxy = {
       addUnit(definition: UnitDefinition): void {
-        unitReg.addUnit(definition);
-        // Also register in EntityRegistry if available (keeps it in sync)
+        entityReg.addUnit(definition);
       },
 
       addFunction(
@@ -92,23 +84,19 @@ export class PluginHost {
           return result.double;
         };
 
-        if (entityReg) {
-          entityReg.registerFunction(fnName, wrappedFn);
-        } else {
-          funcReg.register(fnName, wrappedFn);
-        }
+        entityReg.registerFunction(fnName, wrappedFn);
 
         // Register additional phrase aliases
         for (let i = 1; i < phrases.length; i++) {
           const alias = phrases[i];
           if (alias) {
-            if (entityReg) {
-              entityReg.registerFunction(alias, wrappedFn);
-            } else {
-              funcReg.register(alias, wrappedFn);
-            }
+            entityReg.registerFunction(alias, wrappedFn);
           }
         }
+      },
+
+      addTest(test: { description: string; input: string; line?: number; expected?: number | null; formatted?: string; tolerance?: number }): void {
+        tests.push(test);
       },
     };
 

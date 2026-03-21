@@ -32,6 +32,15 @@ export function formatWithUnit(
   return `${formatted} ${unit}`;
 }
 
+export function formatDate(date: Date): string {
+  return date.toLocaleDateString("en-US", {
+    weekday: "short",
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+}
+
 function getSmartDecimals(value: number): number {
   if (Number.isInteger(value)) return 0;
 

@@ -37,3 +37,6 @@ numi.addUnit({
     "format": "kt",
     "ratio": 1.852
 });
+
+numi.addTest({ description: "100 kmh ≈ 62.14 mph", input: "100 kmh to mph", expected: 62.137, tolerance: 0.1 });
+numi.addTest({ description: "1 mps = 3.6 kmh", input: "1 mps to kmh", expected: 3.6, tolerance: 0.01 });

@@ -1,6 +1,4 @@
 import type { ASTNode } from "../ast.js";
-import { resolveDateLiteral } from "../dates/index.js";
-import { FunctionRegistry, getConstant } from "../functions/index.js";
 import type { EntityRegistry } from "../registry/entity-registry.js";
 import type { UnitRegistry } from "../units/registry.js";
 
@@ -21,16 +19,12 @@ export interface EvalResult {
 }
 
 export interface EvalOptions {
-  unitRegistry?: UnitRegistry;
   entityRegistry?: EntityRegistry;
   /** Previous line results (values only) for line reference tokens */
   previousResults?: (number | null)[];
   /** Current line index */
   currentLine?: number;
 }
-
-// Module-level fallback for backward compatibility (used when no entityRegistry in options)
-const defaultFuncRegistry = new FunctionRegistry();
 
 export function evaluateNode(
   node: ASTNode,
@@ -58,13 +52,7 @@ export function evaluateNodeFull(
       const targetLower = node.targetUnit.toLowerCase();
 
       // Base conversion: "255 in hex", "0xFF in binary", etc.
-      let baseFormatter: ((n: number) => string) | undefined;
-      if (entityReg) {
-        baseFormatter = entityReg.getBaseFormatter(targetLower);
-      } else {
-        baseFormatter = defaultBaseFormats[targetLower];
-      }
-
+      const baseFormatter = entityReg?.getBaseFormatter(targetLower);
       if (baseFormatter) {
         const inner = evaluateNodeFull(node.value, context, options);
         if (inner.value === null) throw new EvalError("Cannot convert empty value");
@@ -77,7 +65,7 @@ export function evaluateNodeFull(
       if (inner.value === null) {
         throw new EvalError("Cannot convert empty value");
       }
-      const unitReg = entityReg?.getUnitRegistry() ?? options?.unitRegistry;
+      const unitReg = entityReg?.getUnitRegistry();
       if (!unitReg) {
         throw new EvalError("Unit conversion not available");
       }
@@ -93,7 +81,7 @@ export function evaluateNodeFull(
     }
 
     case "binary":
-      return { value: evaluateBinary(node.op, node.left, node.right, context, options) };
+      return evaluateBinary(node.op, node.left, node.right, context, options);
 
     case "unary":
       return { value: evaluateUnary(node.op, node.value, context, options) };
@@ -108,11 +96,11 @@ export function evaluateNodeFull(
     }
 
     case "variable": {
-      const constant = entityReg
-        ? entityReg.getConstantValue(node.name)
-        : getConstant(node.name);
-      if (constant !== undefined) {
-        return { value: constant };
+      if (entityReg) {
+        const constant = entityReg.getConstantValue(node.name);
+        if (constant !== undefined) {
+          return { value: constant };
+        }
       }
       const value = context.get(node.name);
       if (value === undefined) {
@@ -122,6 +110,9 @@ export function evaluateNodeFull(
     }
 
     case "call": {
+      if (!entityReg) {
+        throw new EvalError(`Function "${node.name}" requires entity registry`);
+      }
       const args = node.args.map((arg) => {
         const val = evaluateNode(arg, context, options);
         if (val === null) {
@@ -129,10 +120,7 @@ export function evaluateNodeFull(
         }
         return val;
       });
-      if (entityReg) {
-        return { value: entityReg.callFunction(node.name, args) };
-      }
-      return { value: defaultFuncRegistry.call(node.name, args) };
+      return { value: entityReg.callFunction(node.name, args) };
     }
 
     case "percent": {
@@ -161,22 +149,20 @@ export function evaluateNodeFull(
     }
 
     case "date": {
-      if (entityReg) {
-        const date = entityReg.resolveDateLiteral(node.keyword);
-        return { value: date.getTime() };
+      if (!entityReg) {
+        throw new EvalError(`Date literal "${node.keyword}" requires entity registry`);
       }
-      const date = resolveDateLiteral(node.keyword);
-      return { value: date.getTime() };
+      const date = entityReg.resolveDateLiteral(node.keyword);
+      return { value: date.getTime(), unit: "__date__" };
     }
 
     case "lineRef": {
-      if (entityReg) {
-        const prev = options?.previousResults ?? [];
-        const currentLine = options?.currentLine ?? prev.length;
-        return { value: entityReg.resolveLineRef(node.ref, prev, currentLine) };
+      if (!entityReg) {
+        throw new EvalError(`Line reference "${node.ref}" requires entity registry`);
       }
-      // Fallback for backward compatibility
-      return { value: evaluateLineRefFallback(node.ref, options) };
+      const prev = options?.previousResults ?? [];
+      const currentLine = options?.currentLine ?? prev.length;
+      return { value: entityReg.resolveLineRef(node.ref, prev, currentLine) };
     }
 
     case "comment":
@@ -190,44 +176,20 @@ export function evaluateNodeFull(
   }
 }
 
-// Fallback base formats for when no EntityRegistry is provided
-const defaultBaseFormats: Record<string, (n: number) => string> = {
-  hex: (n) => "0x" + Math.trunc(n).toString(16).toUpperCase(),
-  hexadecimal: (n) => "0x" + Math.trunc(n).toString(16).toUpperCase(),
-  binary: (n) => "0b" + (Math.trunc(n) >>> 0).toString(2),
-  bin: (n) => "0b" + (Math.trunc(n) >>> 0).toString(2),
-  octal: (n) => "0o" + Math.trunc(n).toString(8),
-  oct: (n) => "0o" + Math.trunc(n).toString(8),
-  decimal: (n) => String(Math.trunc(n)),
-  dec: (n) => String(Math.trunc(n)),
-};
+/** Convert a numberWithUnit to its base unit value (e.g., 1 day → 86400000 ms). */
+function toBaseValue(value: number, unit: string, entityReg?: EntityRegistry): number {
+  if (!entityReg) return value;
+  const unitReg = entityReg.getUnitRegistry();
+  const unitDef = unitReg.findByPhrase(unit);
+  if (!unitDef) return value;
+  return unitDef.toBase ? unitDef.toBase(value) : value * unitDef.ratio;
+}
 
-// Fallback line ref evaluation for backward compatibility
-function evaluateLineRefFallback(ref: string, options?: EvalOptions): number {
-  const prev = options?.previousResults ?? [];
-  const currentLine = options?.currentLine ?? prev.length;
-  const above = prev.slice(0, currentLine).filter((v): v is number => v !== null);
-
-  switch (ref) {
-    case "sum":
-    case "total":
-      return above.reduce((a, b) => a + b, 0);
-    case "avg":
-    case "average":
-      return above.length > 0 ? above.reduce((a, b) => a + b, 0) / above.length : 0;
-    case "prev":
-    case "previous": {
-      for (let i = currentLine - 1; i >= 0; i--) {
-        const val = prev[i];
-        if (val !== null && val !== undefined) return val;
-      }
-      return 0;
-    }
-    case "count":
-      return above.length;
-    default:
-      throw new EvalError(`Unknown line reference "${ref}"`);
-  }
+/** Check if a unit is a duration (baseUnitId is "millisecond"). */
+function isDurationUnit(unit: string, entityReg?: EntityRegistry): boolean {
+  if (!entityReg) return false;
+  const unitDef = entityReg.getUnitRegistry().findByPhrase(unit);
+  return unitDef?.baseUnitId === "millisecond";
 }
 
 function evaluateBinary(
@@ -236,7 +198,9 @@ function evaluateBinary(
   right: ASTNode,
   context: EvalContext,
   options?: EvalOptions,
-): number {
+): EvalResult {
+  const entityReg = options?.entityRegistry;
+
   // Special case: 100 + 5% means 100 * 1.05, 100 - 5% means 100 * 0.95
   if ((op === "+" || op === "-") && right.type === "percent") {
     const l = evaluateNode(left, context, options);
@@ -245,45 +209,70 @@ function evaluateBinary(
       throw new EvalError("Cannot perform operation on empty value");
     }
     const pct = pctValue / 100;
-    return op === "+" ? l * (1 + pct) : l * (1 - pct);
+    return { value: op === "+" ? l * (1 + pct) : l * (1 - pct) };
   }
 
-  const l = evaluateNode(left, context, options);
-  const r = evaluateNode(right, context, options);
+  const leftResult = evaluateNodeFull(left, context, options);
+  const rightResult = evaluateNodeFull(right, context, options);
 
-  if (l === null || r === null) {
+  if (leftResult.value === null || rightResult.value === null) {
     throw new EvalError("Cannot perform operation on empty value");
+  }
+
+  let l = leftResult.value;
+  let r = rightResult.value;
+
+  // Date ± duration arithmetic: convert duration to milliseconds
+  if (op === "+" || op === "-") {
+    const leftIsDate = leftResult.unit === "__date__";
+    const rightIsDate = rightResult.unit === "__date__";
+
+    if (leftIsDate && rightResult.unit && isDurationUnit(rightResult.unit, entityReg)) {
+      r = toBaseValue(rightResult.value, rightResult.unit, entityReg);
+    }
+    if (rightIsDate && leftResult.unit && isDurationUnit(leftResult.unit, entityReg)) {
+      l = toBaseValue(leftResult.value, leftResult.unit, entityReg);
+    }
+
+    // Determine result unit: date ± duration = date, date - date = duration
+    if (op === "+" && (leftIsDate || rightIsDate)) {
+      return { value: l + r, unit: "__date__" };
+    }
+    if (op === "-" && leftIsDate && !rightIsDate) {
+      return { value: l - r, unit: "__date__" };
+    }
+    // date - date = plain number (duration in ms)
   }
 
   switch (op) {
     case "+":
-      return l + r;
+      return { value: l + r };
     case "-":
-      return l - r;
+      return { value: l - r };
     case "*":
-      return l * r;
+      return { value: l * r };
     case "/":
       if (r === 0) {
         throw new EvalError("Division by zero");
       }
-      return l / r;
+      return { value: l / r };
     case "^":
-      return Math.pow(l, r);
+      return { value: Math.pow(l, r) };
     case "mod":
       if (r === 0) {
         throw new EvalError("Modulo by zero");
       }
-      return l % r;
+      return { value: l % r };
     case "AND":
-      return (Math.trunc(l) & Math.trunc(r)) >>> 0;
+      return { value: (Math.trunc(l) & Math.trunc(r)) >>> 0 };
     case "OR":
-      return (Math.trunc(l) | Math.trunc(r)) >>> 0;
+      return { value: (Math.trunc(l) | Math.trunc(r)) >>> 0 };
     case "XOR":
-      return (Math.trunc(l) ^ Math.trunc(r)) >>> 0;
+      return { value: (Math.trunc(l) ^ Math.trunc(r)) >>> 0 };
     case "<<":
-      return (Math.trunc(l) << Math.trunc(r)) >>> 0;
+      return { value: (Math.trunc(l) << Math.trunc(r)) >>> 0 };
     case ">>":
-      return Math.trunc(l) >> Math.trunc(r);
+      return { value: Math.trunc(l) >> Math.trunc(r) };
     default:
       throw new EvalError(`Unknown operator "${op}"`);
   }

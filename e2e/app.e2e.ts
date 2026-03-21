@@ -33,7 +33,7 @@ async function evalInApp(text: string): Promise<Array<{ value: number | null; fo
   return results;
 }
 
-test.describe("Numi Calculator E2E", () => {
+test.describe("Ilumi Calculator E2E", () => {
   test("app window opens with correct title", async () => {
     const title = await page.title();
     expect(title).toBe("Ilumi Calculator");

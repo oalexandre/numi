@@ -2,11 +2,10 @@ import type { ASTNode } from "./ast.js";
 import { EvalContext } from "./evaluator/context.js";
 import { evaluateNodeFull } from "./evaluator/index.js";
 import type { EvalOptions } from "./evaluator/index.js";
-import { formatNumber, formatWithUnit } from "./formatter.js";
+import { formatDate, formatNumber, formatWithUnit } from "./formatter.js";
 import { parse } from "./parser/index.js";
 import type { ParseOptions } from "./parser/index.js";
 import type { EntityRegistry } from "./registry/entity-registry.js";
-import type { UnitRegistry } from "./units/registry.js";
 
 import type { LineResult } from "./index.js";
 
@@ -70,22 +69,13 @@ function collectVariableRefs(node: ASTNode): Set<string> {
 export class Document {
   private lines: LineState[] = [];
   private context = new EvalContext();
-  private unitRegistry?: UnitRegistry;
   private entityRegistry?: EntityRegistry;
   private parseOptions: ParseOptions = {};
 
-  constructor(registryOrEntity?: UnitRegistry | EntityRegistry) {
-    if (registryOrEntity && "getKnownFunctions" in registryOrEntity) {
-      // EntityRegistry
-      this.entityRegistry = registryOrEntity;
-      this.unitRegistry = registryOrEntity.getUnitRegistry();
+  constructor(entityRegistry?: EntityRegistry) {
+    this.entityRegistry = entityRegistry;
+    if (entityRegistry) {
       this.rebuildParseOptions();
-    } else if (registryOrEntity) {
-      // UnitRegistry (backward compat)
-      this.unitRegistry = registryOrEntity;
-      if (registryOrEntity) {
-        this.parseOptions = { knownUnits: new Set(registryOrEntity.getAllPhrases()) };
-      }
     }
   }
 
@@ -184,7 +174,6 @@ export class Document {
       if (!line || !line.ast) continue;
 
       const evalOpts: EvalOptions = {
-        unitRegistry: this.unitRegistry,
         entityRegistry: this.entityRegistry,
         previousResults,
         currentLine: i,
@@ -194,7 +183,9 @@ export class Document {
         const result = evaluateNodeFull(line.ast, this.context, evalOpts);
         let formatted = "";
         if (result.value !== null) {
-          if (result.unit && isBaseFormatted(result.unit)) {
+          if (result.unit === "__date__") {
+            formatted = formatDate(new Date(result.value));
+          } else if (result.unit && isBaseFormatted(result.unit)) {
             formatted = result.unit;
           } else if (result.unit) {
             formatted = formatWithUnit(result.value, result.unit);

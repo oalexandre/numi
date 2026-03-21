@@ -4,8 +4,7 @@ import { fileURLToPath } from "node:url";
 
 import { describe, it, expect } from "vitest";
 
-import { FunctionRegistry } from "../functions/index.js";
-import { UnitRegistry } from "../units/registry.js";
+import { EntityRegistry } from "../registry/entity-registry.js";
 
 import { PluginHost } from "./host.js";
 
@@ -25,14 +24,13 @@ function findPluginJs(dir: string): string | null {
   }
 }
 
-function createHost(): { host: PluginHost; units: UnitRegistry; funcs: FunctionRegistry } {
-  const units = new UnitRegistry();
-  const funcs = new FunctionRegistry();
-  const host = new PluginHost(units, funcs);
-  return { host, units, funcs };
+function createHost(): { host: PluginHost; registry: EntityRegistry } {
+  const registry = new EntityRegistry();
+  const host = new PluginHost(registry);
+  return { host, registry };
 }
 
-describe("Numi community plugin compatibility", () => {
+describe("Community plugin compatibility", () => {
   const pluginDirs = existsSync(PLUGINS_DIR) ? readdirSync(PLUGINS_DIR) : [];
 
   it("should find community plugins directory", () => {
@@ -59,95 +57,94 @@ describe("Numi community plugin compatibility", () => {
 
   describe("DataRates", () => {
     it("should generate units programmatically in loop", () => {
-      const { host, units } = createHost();
+      const { host, registry } = createHost();
       const jsFile = findPluginJs(join(PLUGINS_DIR, "DataRates"));
       expect(jsFile).not.toBeNull();
       host.loadPlugin(jsFile!);
 
-      // Should have created multiple data rate units
-      expect(units.findByPhrase("kbps")).toBeDefined();
-      expect(units.findByPhrase("Mbps")).toBeDefined();
-      expect(units.findByPhrase("Gbps")).toBeDefined();
+      const unitReg = registry.getUnitRegistry();
+      expect(unitReg.findByPhrase("kbps")).toBeDefined();
+      expect(unitReg.findByPhrase("Mbps")).toBeDefined();
+      expect(unitReg.findByPhrase("Gbps")).toBeDefined();
     });
   });
 
   describe("VectorCalculator", () => {
     it("should maintain state between function calls", () => {
-      const { host, funcs } = createHost();
+      const { host, registry } = createHost();
       const jsFile = findPluginJs(join(PLUGINS_DIR, "VectorCalculator"));
       expect(jsFile).not.toBeNull();
       host.loadPlugin(jsFile!);
 
-      // VectorCalculator registers functions like vpush, vsum, etc.
-      const hasVectorFuncs =
-        funcs.has("vpush") || funcs.has("vadd") || funcs.has("vector") || funcs.getAllNames().some((n) => n.startsWith("v"));
+      const funcs = registry.getKnownFunctions();
+      const hasVectorFuncs = [...funcs].some((n) => n.startsWith("v"));
       expect(hasVectorFuncs).toBe(true);
     });
   });
 
   describe("ScreenUnits", () => {
     it("should use both addUnit and addFunction", () => {
-      const { host, units, funcs } = createHost();
+      const { host, registry } = createHost();
       const jsFile = findPluginJs(join(PLUGINS_DIR, "ScreenUnits"));
       expect(jsFile).not.toBeNull();
       host.loadPlugin(jsFile!);
 
-      // Should register CSS-related units or functions
-      const hasUnits = units.getAllPhrases().length > 0;
-      const hasFuncs = funcs.getAllNames().length > Object.keys({}).length;
+      const unitReg = registry.getUnitRegistry();
+      const hasUnits = unitReg.getAllPhrases().length > 0;
+      const hasFuncs = registry.getKnownFunctions().size > 0;
       expect(hasUnits || hasFuncs).toBe(true);
     });
   });
 
   describe("function plugins", () => {
     it("should load PercentChange", () => {
-      const { host, funcs } = createHost();
+      const { host, registry } = createHost();
       const jsFile = findPluginJs(join(PLUGINS_DIR, "PercentChange"));
       expect(jsFile).not.toBeNull();
       host.loadPlugin(jsFile!);
-      expect(funcs.getAllNames().length).toBeGreaterThan(0);
+      expect(registry.getKnownFunctions().size).toBeGreaterThan(0);
     });
 
     it("should load MinMax", () => {
-      const { host, funcs } = createHost();
+      const { host, registry } = createHost();
       const jsFile = findPluginJs(join(PLUGINS_DIR, "MinMax"));
       expect(jsFile).not.toBeNull();
       host.loadPlugin(jsFile!);
-      expect(funcs.getAllNames().length).toBeGreaterThan(0);
+      expect(registry.getKnownFunctions().size).toBeGreaterThan(0);
     });
 
     it("should load StandardDeviation", () => {
-      const { host, funcs } = createHost();
+      const { host, registry } = createHost();
       const jsFile = findPluginJs(join(PLUGINS_DIR, "StandardDeviation"));
       expect(jsFile).not.toBeNull();
       host.loadPlugin(jsFile!);
-      expect(funcs.getAllNames().length).toBeGreaterThan(0);
+      expect(registry.getKnownFunctions().size).toBeGreaterThan(0);
     });
   });
 
   describe("unit plugins", () => {
     it("should load Pressure units", () => {
-      const { host, units } = createHost();
+      const { host, registry } = createHost();
       const jsFile = findPluginJs(join(PLUGINS_DIR, "Pressure"));
       expect(jsFile).not.toBeNull();
       host.loadPlugin(jsFile!);
-      expect(units.getAllPhrases().length).toBeGreaterThan(0);
+      expect(registry.getUnitRegistry().getAllPhrases().length).toBeGreaterThan(0);
     });
 
     it("should load Speed units", () => {
-      const { host, units } = createHost();
+      const { host, registry } = createHost();
       const jsFile = findPluginJs(join(PLUGINS_DIR, "Speed"));
       expect(jsFile).not.toBeNull();
       host.loadPlugin(jsFile!);
-      expect(units.getAllPhrases().length).toBeGreaterThan(0);
+      expect(registry.getUnitRegistry().getAllPhrases().length).toBeGreaterThan(0);
     });
 
     it("should load Electrical units", () => {
-      const { host, units } = createHost();
+      const { host, registry } = createHost();
       const jsFile = findPluginJs(join(PLUGINS_DIR, "Electrical-conversion"));
       expect(jsFile).not.toBeNull();
       host.loadPlugin(jsFile!);
-      expect(units.getAllPhrases().length).toBeGreaterThan(0);
+      expect(registry.getUnitRegistry().getAllPhrases().length).toBeGreaterThan(0);
     });
   });
 });

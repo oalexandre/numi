@@ -25,4 +25,10 @@ export const unitsTemperaturePlugin: PluginManifest = {
       fromBase: (c: number) => c + 273.15,
     },
   ],
+  tests: [
+    { description: "0 °C = 32 °F", input: "0 celsius to fahrenheit", expected: 32 },
+    { description: "100 °C = 212 °F", input: "100 celsius to fahrenheit", expected: 212 },
+    { description: "0 °C = 273.15 K", input: "0 celsius to kelvin", expected: 273.15, tolerance: 0.01 },
+    { description: "32 °F = 0 °C", input: "32 fahrenheit to celsius", expected: 0, tolerance: 0.01 },
+  ],
 };

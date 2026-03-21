@@ -31,6 +31,16 @@ export const lineReferencesPlugin: PluginManifest = {
   id: "core.line-references",
   name: "Line References",
   description: "Reference previous line results (sum, avg, prev, count)",
+  tests: [
+    { description: "sum of lines above", input: "10\n20\n30\nsum", line: 3, expected: 60 },
+    { description: "total alias for sum", input: "10\n20\ntotal", line: 2, expected: 30 },
+    { description: "avg of lines above", input: "10\n20\n30\navg", line: 3, expected: 20 },
+    { description: "average alias", input: "100\n200\naverage", line: 2, expected: 150 },
+    { description: "prev returns last value", input: "42\nprev", line: 1, expected: 42 },
+    { description: "prev skips empty lines", input: "42\n\nprev", line: 2, expected: 42 },
+    { description: "count of valued lines", input: "10\n20\n30\ncount", line: 3, expected: 3 },
+    { description: "count skips comments", input: "10\n// note\n20\ncount", line: 3, expected: 2 },
+  ],
   lineRefs: {
     sum: { handler: sumHandler, detail: "sum of lines above" },
     total: { handler: sumHandler, detail: "alias for sum" },

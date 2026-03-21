@@ -15,4 +15,9 @@ export const unitsVolumePlugin: PluginManifest = {
     { id: "tablespoon", phrases: "tablespoon, tablespoons, tbsp", baseUnitId: "liter", format: "tbsp", ratio: 0.0147868 },
     { id: "teaspoon", phrases: "teaspoon, teaspoons, tsp", baseUnitId: "liter", format: "tsp", ratio: 0.00492892 },
   ],
+  tests: [
+    { description: "1 gallon ≈ 3.785 L", input: "1 gal to L", expected: 3.78541, tolerance: 0.01 },
+    { description: "1 cup ≈ 236.6 mL", input: "1 cup to mL", expected: 236.588, tolerance: 0.1 },
+    { description: "1 L = 1000 mL", input: "1 L to mL", expected: 1000 },
+  ],
 };

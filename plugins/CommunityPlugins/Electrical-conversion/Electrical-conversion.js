@@ -32,3 +32,7 @@ numi.addUnit({
     "format": "GW",
     "ratio": 1000000000,
 });
+
+numi.addTest({ description: "1 kW = 1000 W", input: "1 kW to W", expected: 1000 });
+numi.addTest({ description: "1 MW = 1000 kW", input: "1 MW to kW", expected: 1000 });
+numi.addTest({ description: "1 W = 1000 mW", input: "1 W to mW", expected: 1000 });

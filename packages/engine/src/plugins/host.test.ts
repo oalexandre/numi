@@ -1,21 +1,19 @@
 import { describe, it, expect } from "vitest";
 
-import { FunctionRegistry } from "../functions/index.js";
-import { UnitRegistry } from "../units/registry.js";
+import { EntityRegistry } from "../registry/entity-registry.js";
 
 import { PluginHost } from "./host.js";
 
-function createHost(): { host: PluginHost; units: UnitRegistry; funcs: FunctionRegistry } {
-  const units = new UnitRegistry();
-  const funcs = new FunctionRegistry();
-  const host = new PluginHost(units, funcs);
-  return { host, units, funcs };
+function createHost(): { host: PluginHost; registry: EntityRegistry } {
+  const registry = new EntityRegistry();
+  const host = new PluginHost(registry);
+  return { host, registry };
 }
 
 describe("PluginHost", () => {
   describe("addUnit", () => {
     it("should register units via numi.addUnit()", () => {
-      const { host, units } = createHost();
+      const { host, registry } = createHost();
       host.loadPluginCode(`
         numi.addUnit({
           id: "custom_unit",
@@ -26,14 +24,15 @@ describe("PluginHost", () => {
         });
       `);
 
-      expect(units.findByPhrase("custom")).toBeDefined();
-      expect(units.findByPhrase("cst")).toBeDefined();
+      const unitReg = registry.getUnitRegistry();
+      expect(unitReg.findByPhrase("custom")).toBeDefined();
+      expect(unitReg.findByPhrase("cst")).toBeDefined();
     });
   });
 
   describe("addFunction", () => {
     it("should register functions via numi.addFunction()", () => {
-      const { host, funcs } = createHost();
+      const { host, registry } = createHost();
       host.loadPluginCode(`
         numi.addFunction(
           { id: "double", phrases: "double, dbl" },
@@ -43,13 +42,13 @@ describe("PluginHost", () => {
         );
       `);
 
-      expect(funcs.has("double")).toBe(true);
-      expect(funcs.has("dbl")).toBe(true);
-      expect(funcs.call("double", [5])).toBe(10);
+      expect(registry.hasFunction("double")).toBe(true);
+      expect(registry.hasFunction("dbl")).toBe(true);
+      expect(registry.callFunction("double", [5])).toBe(10);
     });
 
     it("should handle multi-arg functions", () => {
-      const { host, funcs } = createHost();
+      const { host, registry } = createHost();
       host.loadPluginCode(`
         numi.addFunction(
           { id: "pchange", phrases: "percent change, pchange" },
@@ -61,7 +60,7 @@ describe("PluginHost", () => {
         );
       `);
 
-      expect(funcs.call("pchange", [100, 120])).toBe(20);
+      expect(registry.callFunction("pchange", [100, 120])).toBe(20);
     });
   });
 
@@ -74,7 +73,7 @@ describe("PluginHost", () => {
     });
 
     it("should load subsequent plugins after error", () => {
-      const { host, funcs } = createHost();
+      const { host, registry } = createHost();
 
       host.loadPluginCode(`throw new Error("fail");`);
       host.loadPluginCode(`
@@ -84,7 +83,7 @@ describe("PluginHost", () => {
         );
       `);
 
-      expect(funcs.has("working")).toBe(true);
+      expect(registry.hasFunction("working")).toBe(true);
       expect(host.getPlugins()).toHaveLength(2);
       expect(host.getPlugins()[0]?.loaded).toBe(false);
       expect(host.getPlugins()[1]?.loaded).toBe(true);
@@ -93,7 +92,7 @@ describe("PluginHost", () => {
 
   describe("JS execution", () => {
     it("should support loops for programmatic unit generation", () => {
-      const { host, units } = createHost();
+      const { host, registry } = createHost();
       host.loadPluginCode(`
         var prefixes = ["kilo", "mega", "giga"];
         var ratios = [1000, 1000000, 1000000000];
@@ -108,13 +107,14 @@ describe("PluginHost", () => {
         }
       `);
 
-      expect(units.findByPhrase("kilowatt")).toBeDefined();
-      expect(units.findByPhrase("megawatt")).toBeDefined();
-      expect(units.findByPhrase("gigawatt")).toBeDefined();
+      const unitReg = registry.getUnitRegistry();
+      expect(unitReg.findByPhrase("kilowatt")).toBeDefined();
+      expect(unitReg.findByPhrase("megawatt")).toBeDefined();
+      expect(unitReg.findByPhrase("gigawatt")).toBeDefined();
     });
 
     it("should support closures and persistent state", () => {
-      const { host, funcs } = createHost();
+      const { host, registry } = createHost();
       host.loadPluginCode(`
         var store = [];
         numi.addFunction(
@@ -134,9 +134,9 @@ describe("PluginHost", () => {
         );
       `);
 
-      expect(funcs.call("vpush", [10])).toBe(1);
-      expect(funcs.call("vpush", [20])).toBe(2);
-      expect(funcs.call("vsum", [])).toBe(30);
+      expect(registry.callFunction("vpush", [10])).toBe(1);
+      expect(registry.callFunction("vpush", [20])).toBe(2);
+      expect(registry.callFunction("vsum", [])).toBe(30);
     });
   });
 });

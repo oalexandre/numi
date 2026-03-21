@@ -22,4 +22,10 @@ export const unitsDurationPlugin: PluginManifest = {
     { id: "month", phrases: "month, months", baseUnitId: "millisecond", format: "months", ratio: MS_PER_MONTH },
     { id: "year", phrases: "year, years", baseUnitId: "millisecond", format: "years", ratio: MS_PER_YEAR },
   ],
+  tests: [
+    { description: "2 hours = 120 min", input: "2 hours to minutes", expected: 120 },
+    { description: "1 day = 24 hours", input: "1 day to hours", expected: 24 },
+    { description: "2 weeks = 14 days", input: "2 weeks to days", expected: 14 },
+    { description: "1 hour = 3600 sec", input: "1 hour to seconds", expected: 3600 },
+  ],
 };

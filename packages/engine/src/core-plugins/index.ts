@@ -15,8 +15,10 @@ import { dateLiteralsPlugin } from "./date-literals/index.js";
 import { baseConversionPlugin } from "./base-conversion/index.js";
 
 export { createCurrencyPlugin } from "./units-currency/index.js";
+export { runPluginTests } from "./plugin-test-runner.js";
+export type { TestResult } from "./plugin-test-runner.js";
 
-export type { PluginManifest, MathFn, LineRefHandler, LineRefContext } from "./types.js";
+export type { PluginManifest, PluginTest, MathFn, LineRefHandler, LineRefContext } from "./types.js";
 
 /** All core plugins except currency (which requires a CurrencyFetcher). */
 export const corePlugins: PluginManifest[] = [

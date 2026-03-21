@@ -6,6 +6,12 @@ export const dateLiteralsPlugin: PluginManifest = {
   id: "core.date-literals",
   name: "Date Literals",
   description: "Date keywords: today, now, tomorrow, yesterday",
+  tests: [
+    { description: "today returns a timestamp > 0", input: "today", expected: Date.now(), tolerance: 60000 },
+    { description: "now returns a timestamp > 0", input: "now", expected: Date.now(), tolerance: 60000 },
+    { description: "tomorrow > today", input: "tomorrow - today", expected: MS_PER_DAY, tolerance: 1000 },
+    { description: "today - yesterday = 1 day", input: "today - yesterday", expected: MS_PER_DAY, tolerance: 1000 },
+  ],
   dateLiterals: {
     today: { resolver: () => new Date(), detail: "current date" },
     now: { resolver: () => new Date(), detail: "current date/time" },

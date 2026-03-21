@@ -13,4 +13,10 @@ export const unitsWeightPlugin: PluginManifest = {
     { id: "pound", phrases: "pound, pounds, lb, lbs", baseUnitId: "kilogram", format: "lb", ratio: 0.453592 },
     { id: "stone", phrases: "stone, stones, st", baseUnitId: "kilogram", format: "st", ratio: 6.35029 },
   ],
+  tests: [
+    { description: "1 kg ≈ 2.205 lb", input: "1 kg to lb", expected: 2.20462, tolerance: 0.01 },
+    { description: "1 kg = 1000 g", input: "1 kg to g", expected: 1000 },
+    { description: "1 ton = 1000 kg", input: "1 t to kg", expected: 1000 },
+    { description: "1 stone ≈ 6.35 kg", input: "1 st to kg", expected: 6.35029, tolerance: 0.01 },
+  ],
 };

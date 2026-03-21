@@ -9,6 +9,16 @@ export const baseConversionPlugin: PluginManifest = {
   id: "core.base-conversion",
   name: "Base Conversion",
   description: "Number base conversions (hex, binary, octal, decimal)",
+  tests: [
+    { description: "255 in hex = 0xFF", input: "255 in hex", formatted: "0xFF" },
+    { description: "255 in hexadecimal", input: "255 in hexadecimal", formatted: "0xFF" },
+    { description: "10 in binary = 0b1010", input: "10 in binary", formatted: "0b1010" },
+    { description: "10 in bin = 0b1010", input: "10 in bin", formatted: "0b1010" },
+    { description: "8 in octal = 0o10", input: "8 in octal", formatted: "0o10" },
+    { description: "8 in oct = 0o10", input: "8 in oct", formatted: "0o10" },
+    { description: "0xFF in decimal = 255", input: "0xFF in decimal", formatted: "255" },
+    { description: "0xFF in dec = 255", input: "0xFF in dec", formatted: "255" },
+  ],
   baseConversions: {
     hex: { formatter: toHex, detail: "hexadecimal", aliases: ["hexadecimal"] },
     binary: { formatter: toBin, detail: "binary", aliases: ["bin"] },

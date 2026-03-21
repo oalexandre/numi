@@ -14,4 +14,8 @@ export const unitsAreaPlugin: PluginManifest = {
     { id: "acre", phrases: "acre, acres", baseUnitId: "sqmeter", format: "acre", ratio: 4046.86 },
     { id: "hectare", phrases: "hectare, hectares, ha", baseUnitId: "sqmeter", format: "ha", ratio: 10000 },
   ],
+  tests: [
+    { description: "1 acre ≈ 0.405 ha", input: "1 acre to ha", expected: 0.404686, tolerance: 0.001 },
+    { description: "1 sqft ≈ 0.0929 m²", input: "1 sqft to sqm", expected: 0.092903, tolerance: 0.001 },
+  ],
 };

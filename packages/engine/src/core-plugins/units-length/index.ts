@@ -15,4 +15,11 @@ export const unitsLengthPlugin: PluginManifest = {
     { id: "mile", phrases: "mile, miles, mi", baseUnitId: "meter", format: "mi", ratio: 1609.344 },
     { id: "nautical_mile", phrases: "nautical mile, nautical miles, nmi", baseUnitId: "meter", format: "nmi", ratio: 1852 },
   ],
+  tests: [
+    { description: "1 km = 1000 m", input: "1 km to m", expected: 1000 },
+    { description: "1 mile ≈ 1.609 km", input: "1 mile to km", expected: 1.609344, tolerance: 0.001 },
+    { description: "1 inch = 2.54 cm", input: "1 inch to cm", expected: 2.54, tolerance: 0.01 },
+    { description: "1 foot ≈ 0.3048 m", input: "1 foot to m", expected: 0.3048, tolerance: 0.001 },
+    { description: "1 nmi = 1852 m", input: "1 nmi to m", expected: 1852 },
+  ],
 };

@@ -10,7 +10,7 @@ describe("UnitRegistry", () => {
   });
 
   describe("addUnit", () => {
-    it("should accept Numi-format unit definitions", () => {
+    it("should accept standard unit definitions", () => {
       registry.addUnit({
         id: "meter",
         phrases: "meter, meters, m",

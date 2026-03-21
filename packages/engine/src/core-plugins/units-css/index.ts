@@ -14,4 +14,9 @@ export const unitsCssPlugin: PluginManifest = {
     { id: "vw", phrases: "vw", baseUnitId: "vw", format: "vw", ratio: 1 },
     { id: "vh", phrases: "vh", baseUnitId: "vh", format: "vh", ratio: 1 },
   ],
+  tests: [
+    { description: "32 px = 2 rem", input: "32 px to rem", expected: 2 },
+    { description: "1 rem = 16 px", input: "1 rem to px", expected: 16 },
+    { description: "16 px = 12 pt", input: "16 px to pt", expected: 12 },
+  ],
 };

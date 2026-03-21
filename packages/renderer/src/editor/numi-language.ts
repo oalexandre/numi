@@ -20,13 +20,13 @@ let KEYWORDS = new Set([
   "hex", "binary", "bin", "octal", "oct", "decimal", "dec",
 ]);
 
-interface NumiState {
+interface IlumiState {
   inComment: boolean;
 }
 
-function createParser(): StreamParser<NumiState> {
+function createParser(): StreamParser<IlumiState> {
   return {
-    startState(): NumiState {
+    startState(): IlumiState {
       return { inComment: false };
     },
 

@@ -87,3 +87,7 @@ numi.addUnit({
     "ratio": 0.0689475729
 });
 
+numi.addTest({ description: "1 bar = 1000 millibar", input: "1 bar to millibar", expected: 1000, tolerance: 0.1 });
+numi.addTest({ description: "1 bar = 100000 Pa", input: "1 bar to Pa", expected: 100000, tolerance: 1 });
+numi.addTest({ description: "1 atm ≈ 1.013 bar", input: "1 atm to bar", expected: 1.01325, tolerance: 0.001 });
+

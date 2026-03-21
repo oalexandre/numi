@@ -18,4 +18,9 @@ export const unitsDataPlugin: PluginManifest = {
     { id: "gibibyte", phrases: "gibibyte, gibibytes, GiB", baseUnitId: "bit", format: "GiB", ratio: 8589934592 },
     { id: "tebibyte", phrases: "tebibyte, tebibytes, TiB", baseUnitId: "bit", format: "TiB", ratio: 8796093022208 },
   ],
+  tests: [
+    { description: "1 byte = 8 bits", input: "1 byte to bits", expected: 8 },
+    { description: "1 GB = 1000 MB", input: "1 GB to MB", expected: 1000 },
+    { description: "1 GiB = 1024 MiB", input: "1 GiB to MiB", expected: 1024 },
+  ],
 };

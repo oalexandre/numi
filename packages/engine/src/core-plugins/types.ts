@@ -9,6 +9,22 @@ export interface LineRefContext {
 
 export type LineRefHandler = (ctx: LineRefContext) => number;
 
+/** Declarative test case for plugin self-validation. */
+export interface PluginTest {
+  /** Human-readable description of what is being tested */
+  description: string;
+  /** Expression to evaluate (may contain newlines for multi-line tests) */
+  input: string;
+  /** Which result line to check (default: 0, or last line if negative) */
+  line?: number;
+  /** Expected numeric value (use null for lines that should produce no value) */
+  expected?: number | null;
+  /** Expected formatted output string */
+  formatted?: string;
+  /** Tolerance for approximate numeric comparisons (default: exact match) */
+  tolerance?: number;
+}
+
 export interface PluginManifest {
   id: string;
   name: string;
@@ -22,4 +38,6 @@ export interface PluginManifest {
     string,
     { formatter: (n: number) => string; detail?: string; aliases?: string[] }
   >;
+  /** Self-test cases — evaluated by the test runner to validate the plugin works correctly */
+  tests?: PluginTest[];
 }

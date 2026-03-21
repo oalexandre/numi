@@ -58,3 +58,6 @@ for (let unit of UNITS){
     });
     ratio = ratio * 1024;
 }
+
+numi.addTest({ description: "1 kbps = 1000 bps", input: "1 kbps to bps", expected: 1000 });
+numi.addTest({ description: "1 Mbps = 1000 kbps", input: "1 Mbps to kbps", expected: 1000 });

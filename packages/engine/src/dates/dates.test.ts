@@ -1,36 +1,28 @@
 import { describe, it, expect } from "vitest";
 
-import { evaluate } from "../index.js";
-
-import { resolveDateLiteral, formatDate } from "./index.js";
+import { evaluate, createEntityRegistry } from "../index.js";
 
 describe("date literals", () => {
+  const registry = createEntityRegistry();
+
   it("should resolve today", () => {
-    const date = resolveDateLiteral("today");
+    const date = registry.resolveDateLiteral("today");
     const now = new Date();
     expect(date.getDate()).toBe(now.getDate());
   });
 
   it("should resolve tomorrow", () => {
-    const date = resolveDateLiteral("tomorrow");
+    const date = registry.resolveDateLiteral("tomorrow");
     const now = new Date();
     const expected = new Date(now.getTime() + 86400000);
     expect(date.getDate()).toBe(expected.getDate());
   });
 
   it("should resolve yesterday", () => {
-    const date = resolveDateLiteral("yesterday");
+    const date = registry.resolveDateLiteral("yesterday");
     const now = new Date();
     const expected = new Date(now.getTime() - 86400000);
     expect(date.getDate()).toBe(expected.getDate());
-  });
-
-  it("should format date", () => {
-    const date = new Date(2026, 2, 20); // March 20, 2026
-    const formatted = formatDate(date);
-    expect(formatted).toContain("Mar");
-    expect(formatted).toContain("2026");
-    expect(formatted).toContain("20");
   });
 });
 
@@ -43,6 +35,43 @@ describe("date in evaluate", () => {
   it("should parse tomorrow", () => {
     const results = evaluate("tomorrow");
     expect(results[0]?.value).toBeGreaterThan(0);
+  });
+});
+
+describe("date arithmetic", () => {
+  it("today + 1 day should produce a date-formatted result", () => {
+    const results = evaluate("today + 1 day");
+    expect(results[0]?.value).toBeGreaterThan(0);
+    // Should be formatted as a date, not a raw number
+    expect(results[0]?.formatted).toMatch(/\w{3},/);
+  });
+
+  it("today + 1 day should be ~24h after today", () => {
+    const today = evaluate("today");
+    const todayPlus1 = evaluate("today + 1 day");
+    const diff = (todayPlus1[0]?.value ?? 0) - (today[0]?.value ?? 0);
+    expect(diff).toBeCloseTo(86400000, -3); // 24h in ms
+  });
+
+  it("today + 1 month should differ from today + 1 day", () => {
+    const plus1Day = evaluate("today + 1 day");
+    const plus1Month = evaluate("today + 1 month");
+    expect(plus1Month[0]?.value).toBeGreaterThan(plus1Day[0]?.value ?? 0);
+  });
+
+  it("today + 1 year should differ significantly", () => {
+    const today = evaluate("today");
+    const plus1Year = evaluate("today + 1 year");
+    const diff = (plus1Year[0]?.value ?? 0) - (today[0]?.value ?? 0);
+    // ~365 days in ms
+    expect(diff).toBeGreaterThan(300 * 86400000);
+  });
+
+  it("tomorrow - today should produce a plain number (duration)", () => {
+    const results = evaluate("tomorrow - today");
+    expect(results[0]?.value).toBeCloseTo(86400000, -3);
+    // Should NOT be formatted as a date (weekday + month pattern)
+    expect(results[0]?.formatted).not.toMatch(/[A-Z][a-z]{2}, [A-Z][a-z]{2}/);
   });
 });
 
