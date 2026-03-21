@@ -3,6 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "homepage": "https://ilumi.oalexandre.com.br",
+  "author": {
+    "name": "Alexandre",
+    "email": "eusou@oalexandre.com.br"
+  },
   "type": "module",
   "main": "./out/main/main.js",
   "scripts": {
