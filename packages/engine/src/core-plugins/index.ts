@@ -1,5 +1,4 @@
 import type { PluginManifest } from "./types.js";
-
 import { mathFunctionsPlugin } from "./math-functions/index.js";
 import { mathConstantsPlugin } from "./math-constants/index.js";
 import { unitsLengthPlugin } from "./units-length/index.js";
@@ -19,7 +18,16 @@ export { createCurrencyPlugin } from "./units-currency/index.js";
 export { runPluginTests } from "./plugin-test-runner.js";
 export type { TestResult } from "./plugin-test-runner.js";
 
-export type { PluginManifest, PluginTest, MathFn, LineRefHandler, LineRefContext, HelpSection, HelpExample } from "./types.js";
+export type {
+  PluginManifest,
+  PluginTest,
+  MathFn,
+  LineRefHandler,
+  LineRefContext,
+  LineResultEntry,
+  HelpSection,
+  HelpExample,
+} from "./types.js";
 
 /** All core plugins except currency (which requires a CurrencyFetcher). */
 export const corePlugins: PluginManifest[] = [

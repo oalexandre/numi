@@ -2,8 +2,13 @@ import type { UnitDefinition } from "../units/registry.js";
 
 export type MathFn = (...args: number[]) => number;
 
+export interface LineResultEntry {
+  value: number;
+  isPercent?: boolean;
+}
+
 export interface LineRefContext {
-  previousResults: (number | null)[];
+  previousResults: (LineResultEntry | null)[];
   currentLine: number;
 }
 

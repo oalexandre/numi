@@ -10,6 +10,7 @@ export type ASTNode =
   | PercentNode
   | PercentOpNode
   | NumberWithUnitNode
+  | ExpressionWithUnitNode
   | ConversionNode
   | DateLiteralNode
   | LineRefNode;
@@ -73,6 +74,12 @@ export interface PercentOpNode {
 export interface NumberWithUnitNode {
   type: "numberWithUnit";
   value: number;
+  unit: string;
+}
+
+export interface ExpressionWithUnitNode {
+  type: "expressionWithUnit";
+  expression: ASTNode;
   unit: string;
 }
 

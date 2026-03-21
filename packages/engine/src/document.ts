@@ -6,6 +6,7 @@ import { formatDate, formatNumber, formatWithUnit } from "./formatter.js";
 import { parse } from "./parser/index.js";
 import type { ParseOptions } from "./parser/index.js";
 import type { EntityRegistry } from "./registry/entity-registry.js";
+import type { LineResultEntry } from "./core-plugins/types.js";
 
 import type { LineResult } from "./index.js";
 
@@ -165,7 +166,7 @@ export class Document {
       }
     }
 
-    const previousResults: (number | null)[] = new Array(this.lines.length).fill(null);
+    const previousResults: (LineResultEntry | null)[] = new Array(this.lines.length).fill(null);
 
     this.context.clear();
     for (let i = 0; i < this.lines.length; i++) {
@@ -197,7 +198,8 @@ export class Document {
           value: result.value,
           formatted,
         };
-        previousResults[i] = result.value;
+        previousResults[i] =
+          result.value !== null ? { value: result.value, isPercent: result.isPercent } : null;
       } catch (err) {
         const message = err instanceof Error ? err.message : "Unknown error";
         line.result = {

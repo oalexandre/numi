@@ -130,7 +130,7 @@ Postfix
   / Primary
 
 Primary
-  = FunctionCallParens / FunctionCallSpace / ParenExpr / UnitConversion / NumberWithUnit / Number / DateLiteral / LineRef / Constant / Variable
+  = FunctionCallParens / FunctionCallSpace / ExpressionUnitConversion / ExpressionWithUnit / ParenExpr / UnitConversion / NumberWithUnit / Number / DateLiteral / LineRef / Constant / Variable
 
 UnitConversion
   = n:Number __ fromUnit:UnitName __ ("in" / "to" / "as") __ toUnit:UnitName
@@ -139,6 +139,14 @@ UnitConversion
 NumberWithUnit
   = n:Number __ unit:UnitName
     { return { type: "numberWithUnit", value: n.value, unit }; }
+
+ExpressionUnitConversion
+  = v:(ParenExpr / Variable) __ fromUnit:UnitName __ ("in" / "to" / "as") __ toUnit:UnitName
+    { return { type: "conversion", value: { type: "expressionWithUnit", expression: v, unit: fromUnit }, targetUnit: toUnit }; }
+
+ExpressionWithUnit
+  = v:(ParenExpr / Variable) __ unit:UnitName
+    { return { type: "expressionWithUnit", expression: v, unit }; }
 
 FunctionCallParens
   = name:FunctionName "(" _ args:ArgList _ ")"

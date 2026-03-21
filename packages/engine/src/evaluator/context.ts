@@ -1,12 +1,18 @@
-export class EvalContext {
-  private variables = new Map<string, number>();
+export interface StoredValue {
+  value: number;
+  unit?: string;
+  isPercent?: boolean;
+}
 
-  get(name: string): number | undefined {
+export class EvalContext {
+  private variables = new Map<string, StoredValue>();
+
+  get(name: string): StoredValue | undefined {
     return this.variables.get(name);
   }
 
-  set(name: string, value: number): void {
-    this.variables.set(name, value);
+  set(name: string, stored: StoredValue): void {
+    this.variables.set(name, stored);
   }
 
   has(name: string): boolean {

@@ -11,7 +11,17 @@ export type { PluginInfo, PluginLoaderOptions } from "./plugins/index.js";
 export { EntityRegistry, registerPlugin } from "./registry/index.js";
 export type { EntityInfo } from "./registry/index.js";
 export { corePlugins, createCurrencyPlugin, runPluginTests } from "./core-plugins/index.js";
-export type { PluginManifest, PluginTest, TestResult, MathFn, LineRefHandler, LineRefContext, HelpSection, HelpExample } from "./core-plugins/index.js";
+export type {
+  PluginManifest,
+  PluginTest,
+  TestResult,
+  MathFn,
+  LineRefHandler,
+  LineRefContext,
+  LineResultEntry,
+  HelpSection,
+  HelpExample,
+} from "./core-plugins/index.js";
 
 export interface LineResult {
   line: number;

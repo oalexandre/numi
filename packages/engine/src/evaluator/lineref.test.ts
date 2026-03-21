@@ -71,6 +71,25 @@ describe("line references", () => {
     });
   });
 
+  describe("sum with percentages", () => {
+    it("should apply percentage to running total: Price=10, Free=20%, sum=12", () => {
+      const results = evaluate("Price = 10\nFree = 20%\nsum");
+      expect(results[2]?.value).toBe(12);
+    });
+
+    it("should apply multiple percentages in sequence", () => {
+      const results = evaluate("100\n10%\n20%\nsum");
+      // 100 → +10% → 110 → +20% → 132
+      expect(results[3]?.value).toBe(132);
+    });
+
+    it("should work with percentage between values", () => {
+      const results = evaluate("100\n50%\n200\nsum");
+      // 100 → +50% → 150 → +200 → 350
+      expect(results[3]?.value).toBe(350);
+    });
+  });
+
   describe("line refs in expressions", () => {
     it("should use sum in arithmetic", () => {
       const results = evaluate("10\n20\nsum * 2");

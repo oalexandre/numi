@@ -1,4 +1,4 @@
-import type { MathFn, LineRefHandler, LineRefContext, HelpSection } from "../core-plugins/types.js";
+import type { MathFn, LineRefHandler, HelpSection } from "../core-plugins/types.js";
 import type { UnitDefinition } from "../units/registry.js";
 import { UnitRegistry } from "../units/registry.js";
 
@@ -50,7 +50,12 @@ export class EntityRegistry {
     if (detail) this.dateLiteralDetails.set(name, detail);
   }
 
-  registerBaseConversion(name: string, formatter: (n: number) => string, detail?: string, category?: string): void {
+  registerBaseConversion(
+    name: string,
+    formatter: (n: number) => string,
+    detail?: string,
+    category?: string,
+  ): void {
     this.baseConversions.set(name, formatter);
     if (detail) this.baseConversionDetails.set(name, detail);
     if (category) this.baseConversionCategories.set(name, category);
@@ -123,7 +128,11 @@ export class EntityRegistry {
     return resolver();
   }
 
-  resolveLineRef(ref: string, previousResults: (number | null)[], currentLine: number): number {
+  resolveLineRef(
+    ref: string,
+    previousResults: (import("../core-plugins/types.js").LineResultEntry | null)[],
+    currentLine: number,
+  ): number {
     const handler = this.lineRefs.get(ref);
     if (!handler) throw new Error(`Unknown line reference "${ref}"`);
     return handler({ previousResults, currentLine });

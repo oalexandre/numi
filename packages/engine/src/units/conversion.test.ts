@@ -67,6 +67,41 @@ describe("unit conversion syntax", () => {
     });
   });
 
+  describe("variable with unit conversion", () => {
+    it("should convert variable with unit: c km in meter", () => {
+      const results = evaluate("c = 3\nc km in meter");
+      const r = results[1];
+      expect(r.value).toBeCloseTo(3000);
+      expect(r.formatted).toContain("m");
+    });
+
+    it("should parse variable with unit: c km", () => {
+      const results = evaluate("c = 5\nc km");
+      const r = results[1];
+      expect(r.value).toBe(5);
+      expect(r.formatted).toBe("5 km");
+    });
+
+    it("should convert parenthesized expression with unit", () => {
+      const results = evaluate("a = 1\nb = 2\n(a+b) km in meter");
+      const r = results[2];
+      expect(r.value).toBeCloseTo(3000);
+    });
+
+    it("should preserve unit in variable and convert: distancia = 10 km, distancia in meter", () => {
+      const results = evaluate("distancia = 10 km\ndistancia in meter");
+      expect(results[0].value).toBe(10);
+      expect(results[0].formatted).toBe("10 km");
+      expect(results[1].value).toBeCloseTo(10000);
+      expect(results[1].formatted).toContain("m");
+    });
+
+    it("should preserve unit through variable assignment and arithmetic", () => {
+      const results = evaluate("d = 5 km\nd in meter");
+      expect(results[1].value).toBeCloseTo(5000);
+    });
+  });
+
   describe("error cases", () => {
     it("should error on incompatible units", () => {
       const r = evalLine("5 km to kg");

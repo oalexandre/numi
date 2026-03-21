@@ -1,24 +1,36 @@
-import type { PluginManifest, LineRefContext } from "../types.js";
+import type { PluginManifest, LineRefContext, LineResultEntry } from "../types.js";
 
-function getAbove(ctx: LineRefContext): number[] {
+function getAbove(ctx: LineRefContext): LineResultEntry[] {
   return ctx.previousResults
     .slice(0, ctx.currentLine)
-    .filter((v): v is number => v !== null);
+    .filter((v): v is LineResultEntry => v !== null);
 }
 
 function sumHandler(ctx: LineRefContext): number {
-  return getAbove(ctx).reduce((a, b) => a + b, 0);
+  const entries = getAbove(ctx);
+  let total = 0;
+  for (const entry of entries) {
+    if (entry.isPercent) {
+      // Apply percentage to running total: e.g., total=10, entry=0.2 → 10 + 10*0.2 = 12
+      total = total + total * entry.value;
+    } else {
+      total += entry.value;
+    }
+  }
+  return total;
 }
 
 function avgHandler(ctx: LineRefContext): number {
-  const above = getAbove(ctx);
-  return above.length > 0 ? above.reduce((a, b) => a + b, 0) / above.length : 0;
+  const entries = getAbove(ctx);
+  if (entries.length === 0) return 0;
+  const values = entries.map((e) => e.value);
+  return values.reduce((a, b) => a + b, 0) / values.length;
 }
 
 function prevHandler(ctx: LineRefContext): number {
   for (let i = ctx.currentLine - 1; i >= 0; i--) {
     const val = ctx.previousResults[i];
-    if (val !== null && val !== undefined) return val;
+    if (val !== null && val !== undefined) return val.value;
   }
   return 0;
 }
@@ -50,14 +62,16 @@ export const lineReferencesPlugin: PluginManifest = {
     previous: { handler: prevHandler, detail: "previous line result" },
     count: { handler: countHandler, detail: "count of lines with values" },
   },
-  help: [{
-    title: "Line References",
-    description: "Reference results from lines above.",
-    examples: [
-      { input: "sum", output: "sum of all above" },
-      { input: "avg", output: "average of above" },
-      { input: "prev", output: "previous line result" },
-      { input: "count", output: "lines with values" },
-    ],
-  }],
+  help: [
+    {
+      title: "Line References",
+      description: "Reference results from lines above.",
+      examples: [
+        { input: "sum", output: "sum of all above" },
+        { input: "avg", output: "average of above" },
+        { input: "prev", output: "previous line result" },
+        { input: "count", output: "lines with values" },
+      ],
+    },
+  ],
 };

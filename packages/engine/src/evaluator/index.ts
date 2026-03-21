@@ -1,6 +1,5 @@
 import type { ASTNode } from "../ast.js";
 import type { EntityRegistry } from "../registry/entity-registry.js";
-import type { UnitRegistry } from "../units/registry.js";
 
 import { EvalContext } from "./context.js";
 
@@ -16,12 +15,13 @@ export class EvalError extends Error {
 export interface EvalResult {
   value: number | null;
   unit?: string;
+  isPercent?: boolean;
 }
 
 export interface EvalOptions {
   entityRegistry?: EntityRegistry;
-  /** Previous line results (values only) for line reference tokens */
-  previousResults?: (number | null)[];
+  /** Previous line results for line reference tokens */
+  previousResults?: (import("../core-plugins/types.js").LineResultEntry | null)[];
   /** Current line index */
   currentLine?: number;
 }
@@ -47,6 +47,14 @@ export function evaluateNodeFull(
 
     case "numberWithUnit":
       return { value: node.value, unit: node.unit };
+
+    case "expressionWithUnit": {
+      const exprResult = evaluateNodeFull(node.expression, context, options);
+      if (exprResult.value === null) {
+        throw new EvalError("Cannot attach unit to empty value");
+      }
+      return { value: exprResult.value, unit: node.unit };
+    }
 
     case "conversion": {
       const targetLower = node.targetUnit.toLowerCase();
@@ -91,7 +99,11 @@ export function evaluateNodeFull(
       if (result.value === null) {
         throw new EvalError(`Cannot assign empty value to "${node.name}"`);
       }
-      context.set(node.name, result.value);
+      context.set(node.name, {
+        value: result.value,
+        unit: result.unit,
+        isPercent: result.isPercent,
+      });
       return result;
     }
 
@@ -102,11 +114,11 @@ export function evaluateNodeFull(
           return { value: constant };
         }
       }
-      const value = context.get(node.name);
-      if (value === undefined) {
+      const stored = context.get(node.name);
+      if (stored === undefined) {
         throw new EvalError(`Undefined variable "${node.name}"`);
       }
-      return { value };
+      return { value: stored.value, unit: stored.unit, isPercent: stored.isPercent };
     }
 
     case "call": {
@@ -128,7 +140,7 @@ export function evaluateNodeFull(
       if (value === null) {
         throw new EvalError("Cannot apply percent to empty value");
       }
-      return { value: value / 100 };
+      return { value: value / 100, isPercent: true };
     }
 
     case "percentOp": {
