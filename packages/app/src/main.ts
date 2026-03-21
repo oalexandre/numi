@@ -1,6 +1,6 @@
 import { join, resolve } from "node:path";
 
-import { app, BrowserWindow, ipcMain, nativeTheme } from "electron";
+import { app, BrowserWindow, ipcMain, nativeTheme, nativeImage } from "electron";
 import {
   Document,
   createEntityRegistry,
@@ -32,11 +32,21 @@ function getEffectiveTheme(): "dark" | "light" {
 }
 
 function createWindow(): void {
+  const iconPath = resolve(import.meta.dirname, "../../resources/icon-256.png");
+  let icon: Electron.NativeImage | undefined;
+  try {
+    icon = nativeImage.createFromPath(iconPath);
+    if (icon.isEmpty()) icon = undefined;
+  } catch {
+    icon = undefined;
+  }
+
   mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
     minWidth: 480,
     minHeight: 320,
+    icon,
     titleBarStyle: process.platform === "darwin" ? "hiddenInset" : "default",
     webPreferences: {
       preload: join(import.meta.dirname, "../preload/preload.mjs"),

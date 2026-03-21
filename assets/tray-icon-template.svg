@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- + vertical bar -->
+  <rect x="14.5" y="2" width="3" height="14" rx="1.5" fill="black"/>
+  <!-- + horizontal bar -->
+  <rect x="8" y="7.5" width="16" height="3" rx="1.5" fill="black"/>
+  <!-- − bar -->
+  <rect x="8" y="16.5" width="16" height="3" rx="1.5" fill="black"/>
+  <!-- Stem -->
+  <rect x="12" y="22" width="8" height="9" rx="2.5" fill="black"/>
+</svg>

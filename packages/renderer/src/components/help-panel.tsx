@@ -1,3 +1,31 @@
+function IlumiLogo(): React.JSX.Element {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="64" height="64">
+      <defs>
+        <linearGradient id="hlp-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#1e1b2e"/>
+          <stop offset="100%" stopColor="#121020"/>
+        </linearGradient>
+        <radialGradient id="hlp-glow" cx="50%" cy="38%" r="28%">
+          <stop offset="0%" stopColor="#ffc800" stopOpacity="0.16"/>
+          <stop offset="100%" stopOpacity="0"/>
+        </radialGradient>
+        <linearGradient id="hlp-gold" x1="0.5" y1="0" x2="0.5" y2="1">
+          <stop offset="0%" stopColor="#ffe066"/>
+          <stop offset="50%" stopColor="#f0b800"/>
+          <stop offset="100%" stopColor="#cc8800"/>
+        </linearGradient>
+      </defs>
+      <rect x="16" y="16" width="480" height="480" rx="96" fill="url(#hlp-bg)"/>
+      <circle cx="256" cy="165" r="130" fill="url(#hlp-glow)"/>
+      <rect x="249" y="68" width="14" height="118" rx="7" fill="url(#hlp-gold)"/>
+      <rect x="198" y="120" width="116" height="14" rx="7" fill="url(#hlp-gold)"/>
+      <rect x="198" y="208" width="116" height="14" rx="7" fill="url(#hlp-gold)"/>
+      <rect x="230" y="272" width="52" height="138" rx="14" fill="url(#hlp-gold)"/>
+    </svg>
+  );
+}
+
 interface HelpPanelProps {
   visible: boolean;
   onClose: () => void;
@@ -27,8 +55,7 @@ export function HelpPanel({ visible, onClose }: HelpPanelProps): React.JSX.Eleme
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between" style={{ marginBottom: "16px" }}>
-          <h2 style={{ fontSize: "16px", fontWeight: 600 }}>Quick Reference</h2>
+        <div className="flex flex-col items-center" style={{ marginBottom: "20px" }}>
           <button
             onClick={onClose}
             style={{
@@ -38,10 +65,13 @@ export function HelpPanel({ visible, onClose }: HelpPanelProps): React.JSX.Eleme
               fontSize: "18px",
               cursor: "pointer",
               padding: "4px 8px",
+              alignSelf: "flex-end",
             }}
           >
             ×
           </button>
+          <IlumiLogo />
+          <h2 style={{ fontSize: "16px", fontWeight: 600, marginTop: "10px" }}>Quick Reference</h2>
         </div>
 
         <Section title="Basic Arithmetic">
