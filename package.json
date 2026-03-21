@@ -48,6 +48,7 @@
     "@codemirror/view": "^6.40.0",
     "@lezer/highlight": "^1.2.3",
     "@tailwindcss/vite": "^4.2.2",
+    "html-to-image": "^1.11.13",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "tailwindcss": "^4.2.2"

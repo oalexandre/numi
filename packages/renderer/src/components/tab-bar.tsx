@@ -12,6 +12,7 @@ interface TabBarProps {
   onCreate: () => void;
   onClose: (id: string) => void;
   onRename: (id: string, title: string) => void;
+  onShare: () => Promise<void>;
   onHelp: () => void;
 }
 
@@ -22,10 +23,12 @@ export function TabBar({
   onCreate,
   onClose,
   onRename,
+  onShare,
   onHelp,
 }: TabBarProps): React.JSX.Element {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
+  const [copied, setCopied] = useState(false);
 
   const startRename = useCallback((id: string, currentTitle: string) => {
     setEditingId(id);
@@ -151,6 +154,31 @@ export function TabBar({
         +
       </button>
       <div style={{ flex: 1 }} />
+      <button
+        onClick={async () => {
+          await onShare();
+          setCopied(true);
+          setTimeout(() => setCopied(false), 1500);
+        }}
+        className="shrink-0 cursor-pointer"
+        style={{
+          background: "transparent",
+          border: "1px solid var(--border)",
+          borderRadius: "50%",
+          color: copied ? "var(--text-result)" : "var(--text-muted)",
+          fontSize: "12px",
+          width: "20px",
+          height: "20px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          lineHeight: 1,
+          marginRight: "4px",
+        }}
+        title="Copy as image"
+      >
+        {copied ? "✓" : "⤴"}
+      </button>
       <button
         onClick={onHelp}
         className="shrink-0 cursor-pointer"
