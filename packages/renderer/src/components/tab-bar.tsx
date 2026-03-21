@@ -1,4 +1,75 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
+
+function IconButton({
+  onClick,
+  tooltip,
+  children,
+}: {
+  onClick: () => void | Promise<void>;
+  tooltip: string;
+  children: React.ReactNode;
+}): React.JSX.Element {
+  const [tipPos, setTipPos] = useState<{ x: number; y: number; right: number } | null>(null);
+  const btnRef = useRef<HTMLButtonElement>(null);
+
+  return (
+    <div style={{ marginRight: "4px" }}>
+      <button
+        ref={btnRef}
+        onClick={onClick}
+        onMouseEnter={() => {
+          const rect = btnRef.current?.getBoundingClientRect();
+          if (rect)
+            setTipPos({
+              x: rect.left + rect.width / 2,
+              y: rect.top - 6,
+              right: window.innerWidth - rect.right,
+            });
+        }}
+        onMouseLeave={() => setTipPos(null)}
+        className="shrink-0 cursor-pointer"
+        style={{
+          background: "transparent",
+          border: "1px solid var(--border)",
+          borderRadius: "50%",
+          color: "var(--text-muted)",
+          width: "20px",
+          height: "20px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          lineHeight: 1,
+          padding: 0,
+        }}
+      >
+        {children}
+      </button>
+      {tipPos && (
+        <div
+          style={{
+            position: "fixed",
+            top: tipPos.y,
+            right: tipPos.right < 80 ? 4 : undefined,
+            left: tipPos.right < 80 ? undefined : tipPos.x,
+            transform: tipPos.right < 80 ? "translateY(-100%)" : "translate(-50%, -100%)",
+            background: "var(--bg-primary)",
+            color: "var(--text-primary)",
+            border: "1px solid var(--border)",
+            borderRadius: "4px",
+            padding: "3px 8px",
+            fontSize: "11px",
+            fontFamily: "system-ui, sans-serif",
+            whiteSpace: "nowrap",
+            pointerEvents: "none",
+            zIndex: 9999,
+          }}
+        >
+          {tooltip}
+        </div>
+      )}
+    </div>
+  );
+}
 
 interface NoteTab {
   id: string;
@@ -154,52 +225,86 @@ export function TabBar({
         +
       </button>
       <div style={{ flex: 1 }} />
-      <button
+      {/* Toast notification */}
+      {copied && (
+        <div
+          style={{
+            position: "fixed",
+            top: "12px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            background: "var(--bg-primary)",
+            color: "var(--text-result)",
+            border: "1px solid var(--border)",
+            borderRadius: "6px",
+            padding: "6px 14px",
+            fontSize: "12px",
+            fontFamily: "system-ui, sans-serif",
+            zIndex: 9999,
+            pointerEvents: "none",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
+            animation: "toast-in 0.2s ease-out",
+          }}
+        >
+          Image copied to clipboard
+        </div>
+      )}
+      <IconButton
         onClick={async () => {
           await onShare();
           setCopied(true);
           setTimeout(() => setCopied(false), 1500);
         }}
-        className="shrink-0 cursor-pointer"
-        style={{
-          background: "transparent",
-          border: "1px solid var(--border)",
-          borderRadius: "50%",
-          color: copied ? "var(--text-result)" : "var(--text-muted)",
-          fontSize: "12px",
-          width: "20px",
-          height: "20px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          lineHeight: 1,
-          marginRight: "4px",
-        }}
-        title="Copy as image"
+        tooltip="Share as image"
       >
-        {copied ? "✓" : "⤴"}
-      </button>
-      <button
-        onClick={onHelp}
-        className="shrink-0 cursor-pointer"
-        style={{
-          background: "transparent",
-          border: "1px solid var(--border)",
-          borderRadius: "50%",
-          color: "var(--text-muted)",
-          fontSize: "12px",
-          width: "20px",
-          height: "20px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          lineHeight: 1,
-          marginRight: "4px",
-        }}
-        title="Help &amp; reference"
-      >
-        ?
-      </button>
+        {copied ? (
+          <svg
+            width="12"
+            height="12"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="var(--text-result)"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+        ) : (
+          <svg
+            width="12"
+            height="12"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <circle cx="18" cy="5" r="3" />
+            <circle cx="6" cy="12" r="3" />
+            <circle cx="18" cy="19" r="3" />
+            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+          </svg>
+        )}
+      </IconButton>
+      <IconButton onClick={onHelp} tooltip="Help & reference">
+        <svg
+          width="12"
+          height="12"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <circle cx="12" cy="12" r="10" />
+          <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+          <line x1="12" y1="17" x2="12.01" y2="17" />
+        </svg>
+      </IconButton>
     </div>
   );
 }

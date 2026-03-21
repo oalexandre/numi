@@ -43,13 +43,7 @@ body {
   background: var(--bg-primary);
   color: var(--text-primary);
   font-family:
-    "SF Mono",
-    "Cascadia Code",
-    "JetBrains Mono",
-    "Fira Code",
-    Menlo,
-    Consolas,
-    monospace;
+    "SF Mono", "Cascadia Code", "JetBrains Mono", "Fira Code", Menlo, Consolas, monospace;
   font-size: 14px;
   overflow: hidden;
   transition:
@@ -138,4 +132,15 @@ body {
   color: var(--text-muted) !important;
   font-style: italic;
   margin-left: 8px;
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
 }
