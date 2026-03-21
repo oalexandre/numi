@@ -91,3 +91,13 @@ numi.addTest({ description: "1 bar = 1000 millibar", input: "1 bar to millibar",
 numi.addTest({ description: "1 bar = 100000 Pa", input: "1 bar to Pa", expected: 100000, tolerance: 1 });
 numi.addTest({ description: "1 atm ≈ 1.013 bar", input: "1 atm to bar", expected: 1.01325, tolerance: 0.001 });
 
+numi.addHelp({
+  title: "Pressure",
+  description: "Convert between pressure units (bar, Pa, atm, psi, mmHg)",
+  examples: [
+    { input: "1 atm to bar", output: "1.013 bar" },
+    { input: "14.7 psi to kPa", output: "101.35 kPa" },
+    { input: "760 mmHg to atm", output: "1 atm" },
+  ],
+});
+

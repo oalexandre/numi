@@ -51,3 +51,13 @@ numi.addFunction({ "id": "vec", "phrases": "vec" }, (values) => {
     }
     return;
 });
+
+numi.addHelp({
+  title: "Vector Calculator",
+  description: "Create 2D/3D vectors and compute dot product or angle between them",
+  examples: [
+    { input: "vec(1, 0, 0)", output: "0", desc: "Create a vector (returns its index)" },
+    { input: "dot(0, 1)", output: "0", desc: "Dot product of vectors at indices 0 and 1" },
+    { input: "angle(0, 1)", output: "1.57 rad", desc: "Angle between two vectors" },
+  ],
+});

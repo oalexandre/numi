@@ -8,3 +8,12 @@ numi.addUnit({
    "format" : "sats",
    "ratio" : 0.00000001,
 });
+
+numi.addHelp({
+  title: "Bitcoin Satoshis",
+  description: "Convert between satoshis and BTC",
+  examples: [
+    { input: "100000000 sats to BTC", output: "1 BTC" },
+    { input: "0.5 BTC to sats", output: "50,000,000 sats" },
+  ],
+});

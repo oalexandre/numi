@@ -50,4 +50,14 @@ export const lineReferencesPlugin: PluginManifest = {
     previous: { handler: prevHandler, detail: "previous line result" },
     count: { handler: countHandler, detail: "count of lines with values" },
   },
+  help: [{
+    title: "Line References",
+    description: "Reference results from lines above.",
+    examples: [
+      { input: "sum", output: "sum of all above" },
+      { input: "avg", output: "average of above" },
+      { input: "prev", output: "previous line result" },
+      { input: "count", output: "lines with values" },
+    ],
+  }],
 };

@@ -42,4 +42,8 @@ export function registerPlugin(registry: EntityRegistry, manifest: PluginManifes
       }
     }
   }
+
+  if (manifest.help) {
+    registry.registerHelpSections(manifest.help, "core");
+  }
 }

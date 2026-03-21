@@ -28,4 +28,12 @@ export const unitsDurationPlugin: PluginManifest = {
     { description: "2 weeks = 14 days", input: "2 weeks to days", expected: 14 },
     { description: "1 hour = 3600 sec", input: "1 hour to seconds", expected: 3600 },
   ],
+  help: [{
+    title: "Duration",
+    examples: [
+      { input: "2 hours to minutes", output: "120 min" },
+      { input: "90 minutes to hours", output: "1.5 hr" },
+      { input: "1 week to days", output: "7 days" },
+    ],
+  }],
 };

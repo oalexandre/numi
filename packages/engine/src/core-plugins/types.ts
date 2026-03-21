@@ -40,4 +40,19 @@ export interface PluginManifest {
   >;
   /** Self-test cases — evaluated by the test runner to validate the plugin works correctly */
   tests?: PluginTest[];
+  /** Help sections displayed in the help panel */
+  help?: HelpSection[];
+}
+
+/** A help section that appears in the help panel. */
+export interface HelpSection {
+  title: string;
+  description?: string;
+  examples: HelpExample[];
+}
+
+export interface HelpExample {
+  input: string;
+  output: string;
+  desc?: string;
 }

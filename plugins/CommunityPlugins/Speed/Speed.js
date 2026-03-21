@@ -40,3 +40,13 @@ numi.addUnit({
 
 numi.addTest({ description: "100 kmh ≈ 62.14 mph", input: "100 kmh to mph", expected: 62.137, tolerance: 0.1 });
 numi.addTest({ description: "1 mps = 3.6 kmh", input: "1 mps to kmh", expected: 3.6, tolerance: 0.01 });
+
+numi.addHelp({
+  title: "Speed",
+  description: "Convert between speed units (km/h, mph, m/s, ft/s, knots)",
+  examples: [
+    { input: "100 kmh to mph", output: "62.14 mph" },
+    { input: "60 mph to knots", output: "52.16 kt" },
+    { input: "340 mps to kmh", output: "1,224 km/h", desc: "Speed of sound" },
+  ],
+});

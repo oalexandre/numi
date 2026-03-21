@@ -9,9 +9,8 @@ import type { EntityRegistry } from "./registry/entity-registry.js";
 
 import type { LineResult } from "./index.js";
 
-function isBaseFormatted(unit: string): boolean {
-  return /^(0x[0-9A-Fa-f]+|0b[01]+|0o[0-7]+|-?\d+)$/.test(unit);
-}
+/** Base conversions and timezone formatters use the __fmt__ prefix. */
+const FMT_PREFIX = "__fmt__";
 
 interface LineState {
   source: string;
@@ -183,10 +182,10 @@ export class Document {
         const result = evaluateNodeFull(line.ast, this.context, evalOpts);
         let formatted = "";
         if (result.value !== null) {
-          if (result.unit === "__date__") {
+          if (result.unit?.startsWith(FMT_PREFIX)) {
+            formatted = result.unit.slice(FMT_PREFIX.length);
+          } else if (result.unit === "__date__") {
             formatted = formatDate(new Date(result.value));
-          } else if (result.unit && isBaseFormatted(result.unit)) {
-            formatted = result.unit;
           } else if (result.unit) {
             formatted = formatWithUnit(result.value, result.unit);
           } else {

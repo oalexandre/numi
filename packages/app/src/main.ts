@@ -70,6 +70,10 @@ function createWindow(): void {
     return entityRegistry.getAllEntityInfo();
   });
 
+  ipcMain.handle("numi:getHelpSections", () => {
+    return entityRegistry.getHelpSections();
+  });
+
   ipcMain.handle("numi:getTheme", () => {
     return getEffectiveTheme();
   });

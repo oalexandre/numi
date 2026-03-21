@@ -24,4 +24,13 @@ export const dateLiteralsPlugin: PluginManifest = {
       detail: "yesterday's date",
     },
   },
+  help: [{
+    title: "Dates",
+    description: "Date arithmetic with today, now, tomorrow, yesterday.",
+    examples: [
+      { input: "today", output: "current date" },
+      { input: "today + 2 weeks", output: "date" },
+      { input: "tomorrow - 1 day", output: "today's date" },
+    ],
+  }],
 };

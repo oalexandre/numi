@@ -1,3 +1,5 @@
+import { useState, useEffect } from "react";
+
 function IlumiLogo(): React.JSX.Element {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="64" height="64">
@@ -26,12 +28,30 @@ function IlumiLogo(): React.JSX.Element {
   );
 }
 
+interface HelpEntry {
+  title: string;
+  description?: string;
+  examples: Array<{ input: string; output: string; desc?: string }>;
+}
+
 interface HelpPanelProps {
   visible: boolean;
   onClose: () => void;
 }
 
 export function HelpPanel({ visible, onClose }: HelpPanelProps): React.JSX.Element | null {
+  const [coreSections, setCoreSections] = useState<HelpEntry[]>([]);
+  const [communitySections, setCommunitySections] = useState<HelpEntry[]>([]);
+
+  useEffect(() => {
+    if (visible) {
+      window.numi.getHelpSections().then((sections) => {
+        setCoreSections(sections.core);
+        setCommunitySections(sections.community);
+      }).catch(() => {});
+    }
+  }, [visible]);
+
   if (!visible) return null;
 
   return (
@@ -77,6 +97,7 @@ export function HelpPanel({ visible, onClose }: HelpPanelProps): React.JSX.Eleme
           </span>
         </div>
 
+        {/* Static: language features */}
         <Section title="Basic Arithmetic">
           <Example input="2 + 3" output="5" />
           <Example input="10 - 4" output="6" />
@@ -91,54 +112,14 @@ export function HelpPanel({ visible, onClose }: HelpPanelProps): React.JSX.Eleme
           <Example input="price = 100" output="100" />
           <Example input="tax = 8.5" output="8.5" />
           <Example input="price + tax" output="108.5" />
-          <Example input="total = price * 2" output="200" />
         </Section>
 
         <Section title="Percentages">
-          <Example input="5%" output="0.05" />
-          <Example input="100 + 5%" output="105" desc="add 5% of 100" />
+          <Example input="100 + 5%" output="105" desc="add 5%" />
           <Example input="200 - 10%" output="180" desc="subtract 10%" />
           <Example input="5% of 200" output="10" />
           <Example input="10% off 50" output="45" desc="discount" />
           <Example input="10% on 50" output="55" desc="markup" />
-        </Section>
-
-        <Section title="Math Functions">
-          <Desc>Use with parentheses or a space: sqrt(16) or sqrt 16</Desc>
-          <Example input="sqrt(16)" output="4" />
-          <Example input="abs(-5)" output="5" />
-          <Example input="ceil(4.1)" output="5" />
-          <Example input="floor(4.9)" output="4" />
-          <Example input="round(4.5)" output="5" />
-          <Example input="sin(0), cos(0), tan(0)" output="trig" />
-          <Example input="log(100)" output="2" desc="log base 10" />
-          <Example input="ln(e)" output="1" desc="natural log" />
-          <Example input="min(3, 1, 2)" output="1" />
-          <Example input="max(3, 1, 2)" output="3" />
-        </Section>
-
-        <Section title="Constants">
-          <Example input="pi" output="3.14159..." />
-          <Example input="e" output="2.71828..." />
-          <Example input="tau" output="6.28318..." />
-        </Section>
-
-        <Section title="Unit Conversions">
-          <Desc>Use in, to, or as to convert between units.</Desc>
-          <Example input="5 km to miles" output="3.107 mi" />
-          <Example input="100 celsius to fahrenheit" output="212 °F" />
-          <Example input="1 kg to pounds" output="2.205 lb" />
-          <Example input="1 gallon to liters" output="3.785 L" />
-          <Example input="32 px to rem" output="2 rem" />
-          <Example input="2 hours to minutes" output="120 min" />
-        </Section>
-
-        <Section title="Number Formats">
-          <Example input="0xFF" output="255" desc="hexadecimal" />
-          <Example input="0b1010" output="10" desc="binary" />
-          <Example input="1.5e3" output="1,500" desc="scientific" />
-          <Example input="255 in hex" output="0xFF" />
-          <Example input="10 in binary" output="0b1010" />
         </Section>
 
         <Section title="Bitwise Operations">
@@ -149,20 +130,40 @@ export function HelpPanel({ visible, onClose }: HelpPanelProps): React.JSX.Eleme
           <Example input="1 << 4" output="16" />
         </Section>
 
-        <Section title="Line References">
-          <Desc>Reference results from lines above.</Desc>
-          <Example input="sum" output="sum of all above" />
-          <Example input="avg" output="average of above" />
-          <Example input="prev" output="previous line result" />
-          <Example input="count" output="lines with values" />
-        </Section>
-
         <Section title="Comments">
           <Desc>Lines starting with // or # are ignored.</Desc>
           <Example input="// shopping list" output="" />
           <Example input="# notes here" output="" />
         </Section>
 
+        {/* Dynamic: core plugin help */}
+        {coreSections.map((section, i) => (
+          <Section key={`core-${i}`} title={section.title}>
+            {section.description && <Desc>{section.description}</Desc>}
+            {section.examples.map((ex, j) => (
+              <Example key={j} input={ex.input} output={ex.output} desc={ex.desc} />
+            ))}
+          </Section>
+        ))}
+
+        {/* Dynamic: community plugin help */}
+        {communitySections.length > 0 && (
+          <div style={{ marginTop: "8px", marginBottom: "12px" }}>
+            <span style={{ fontSize: "11px", fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+              Community Plugins
+            </span>
+          </div>
+        )}
+        {communitySections.map((section, i) => (
+          <Section key={`comm-${i}`} title={section.title}>
+            {section.description && <Desc>{section.description}</Desc>}
+            {section.examples.map((ex, j) => (
+              <Example key={j} input={ex.input} output={ex.output} desc={ex.desc} />
+            ))}
+          </Section>
+        ))}
+
+        {/* Static: keyboard shortcuts (always last) */}
         <Section title="Keyboard Shortcuts" last>
           <Shortcut keys="Cmd/Ctrl + N" action="New note" />
           <Shortcut keys="Cmd/Ctrl + W" action="Close note" />

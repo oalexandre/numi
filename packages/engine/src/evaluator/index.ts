@@ -51,13 +51,13 @@ export function evaluateNodeFull(
     case "conversion": {
       const targetLower = node.targetUnit.toLowerCase();
 
-      // Base conversion: "255 in hex", "0xFF in binary", etc.
+      // Base conversion: "255 in hex", "now in UTC", etc.
       const baseFormatter = entityReg?.getBaseFormatter(targetLower);
       if (baseFormatter) {
         const inner = evaluateNodeFull(node.value, context, options);
         if (inner.value === null) throw new EvalError("Cannot convert empty value");
         const formatted = baseFormatter(inner.value);
-        return { value: inner.value, unit: formatted };
+        return { value: inner.value, unit: `__fmt__${formatted}` };
       }
 
       // Unit conversion

@@ -37,3 +37,13 @@ numi.addUnit({
     "format" : "Toonies",
     "ratio" : 2,
 });
+
+numi.addHelp({
+  title: "Canadian Coins",
+  description: "Convert between CAD and Canadian coin denominations",
+  examples: [
+    { input: "5 CAD to quarters", output: "20 Quarters" },
+    { input: "10 loonies to toonies", output: "5 Toonies" },
+    { input: "100 nickels to CAD", output: "5 CAD" },
+  ],
+});

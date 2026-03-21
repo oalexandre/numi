@@ -16,6 +16,7 @@ Website: [ilumi.oalexandre.com.br](https://ilumi.oalexandre.com.br)
    - [numi.addFunction()](#numiaddfunctiondefinition-callback)
    - [numi.addUnit()](#numiaddunitdefinition)
    - [numi.addTest()](#numiaddtesttest)
+   - [numi.addHelp()](#numiaddhelpsection)
 4. [Core Plugins (TypeScript)](#core-plugins-typescript)
 5. [Entity Types Reference](#entity-types-reference)
 6. [PluginManifest Interface](#pluginmanifest-interface)
@@ -332,6 +333,38 @@ numi.addTest({
 
 ---
 
+### `numi.addHelp(section)`
+
+Registers a help section that appears in the app's Help panel. This makes your plugin discoverable to users.
+
+**Parameters:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `title` | `string` | Section title (e.g., "Speed Units") |
+| `description` | `string` | *(optional)* Brief description shown below the title |
+| `examples` | `array` | List of `{ input, output, desc? }` usage examples |
+
+**Example:**
+
+```javascript
+numi.addHelp({
+  title: "Speed",
+  description: "Convert between speed units.",
+  examples: [
+    { input: "100 kmh to mph", output: "62.14 mph" },
+    { input: "1 mps to kmh", output: "3.6 km/h" },
+    { input: "60 mph to knots", output: "52.14 kt" },
+  ],
+});
+```
+
+Help sections from community plugins appear in the Help panel below core plugin sections, under a "Community Plugins" label.
+
+> **Best practice:** always add a help section so users know your plugin exists and how to use it.
+
+---
+
 ## Core Plugins (TypeScript)
 
 Core plugins are built-in and use the full `PluginManifest` interface. They have access to all entity types, including ones not available to community plugins.
@@ -343,6 +376,7 @@ Core plugins are built-in and use the full `PluginManifest` interface. They have
 | Functions | `numi.addFunction()` | `functions` |
 | Units | `numi.addUnit()` | `units` |
 | Tests | `numi.addTest()` | `tests` |
+| Help | `numi.addHelp()` | `help` |
 | Constants | — | `constants` |
 | Line References | — | `lineRefs` |
 | Date Literals | — | `dateLiterals` |
@@ -506,6 +540,30 @@ Built-in conversions: `hex`, `binary`/`bin`, `octal`/`oct`, `decimal`/`dec`
 
 Usage: `255 in hex` → `0xFF`
 
+### Timezone Conversions
+
+Convert date values to different timezones using `in` or `to`. Implemented as base conversions internally.
+
+```
+now in UTC      → Fri, Mar 21, 2026, 10:00 PM UTC
+today in JST    → Sat, Mar 22, 2026, 7:00 AM JST
+tomorrow in BRT → Sun, Mar 22, 2026, 7:00 PM BRT
+now in London   → Fri, Mar 21, 2026, 10:00 PM GMT
+```
+
+**Supported timezones:**
+
+| Abbreviations | Region |
+|---------------|--------|
+| `UTC`, `GMT` | Universal / Greenwich |
+| `EST`, `EDT`, `CST`, `CDT`, `MST`, `MDT`, `PST`, `PDT` | US timezones |
+| `BRT` | Brazil (São Paulo) |
+| `CET`, `CEST`, `EET`, `EEST`, `WET`, `MSK` | Europe |
+| `JST`, `KST`, `IST`, `SGT`, `HKT` | Asia |
+| `AEST`, `AEDT`, `NZST` | Oceania |
+
+**City names:** `London`, `Paris`, `Berlin`, `Moscow`, `Dubai`, `Mumbai`, `Shanghai`, `Tokyo`, `Seoul`, `Singapore`, `Sydney`, `Auckland`, `Lisbon`, `Chicago`, `Denver`
+
 ### Tests
 
 Self-validation test cases. Available to both core and community plugins.
@@ -549,6 +607,7 @@ interface PluginManifest {
     aliases?: string[];
   }>;
   tests?: PluginTest[];
+  help?: HelpSection[];
 }
 
 type MathFn = (...args: number[]) => number;
@@ -567,6 +626,18 @@ interface PluginTest {
   expected?: number | null;
   formatted?: string;
   tolerance?: number;
+}
+
+interface HelpSection {
+  title: string;
+  description?: string;
+  examples: HelpExample[];
+}
+
+interface HelpExample {
+  input: string;
+  output: string;
+  desc?: string;
 }
 
 interface UnitDefinition {
@@ -644,6 +715,7 @@ packages/engine/src/
     line-references/             # sum, avg, prev, count, total
     date-literals/               # today, now, tomorrow, yesterday
     base-conversion/             # hex, binary, octal, decimal
+    timezone/                    # UTC, EST, PST, BRT, JST, city names
   plugins/
     host.ts                      # PluginHost — VM sandbox, numi API
     loader.ts                    # PluginLoader — file discovery, hot-reload
@@ -670,7 +742,7 @@ plugins/
 2. `PluginHost` is created with the `EntityRegistry`
 3. `PluginLoader` discovers `.js` files in bundled `CommunityPlugins/` and user plugins directory
 4. Each community plugin runs in a VM sandbox with the `numi` API
-5. `numi.addUnit()` / `numi.addFunction()` / `numi.addTest()` register into the `EntityRegistry`
+5. `numi.addUnit()` / `numi.addFunction()` / `numi.addTest()` / `numi.addHelp()` register into the `EntityRegistry`
 6. `Document.refreshParseOptions()` rebuilds parser options from the registry
 7. The renderer receives entity info via IPC and updates syntax highlighting + autocomplete
 8. On window focus, `PluginLoader.reload()` scans for new plugins

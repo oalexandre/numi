@@ -58,4 +58,20 @@ export const mathFunctionsPlugin: PluginManifest = {
     { description: "max(3, 1, 2) = 3", input: "max(3, 1, 2)", expected: 3 },
     { description: "sqrt with space syntax", input: "sqrt 25", expected: 5 },
   ],
+  help: [{
+    title: "Math Functions",
+    description: "Use with parentheses or a space: sqrt(16) or sqrt 16",
+    examples: [
+      { input: "sqrt(16)", output: "4" },
+      { input: "abs(-5)", output: "5" },
+      { input: "ceil(4.1)", output: "5" },
+      { input: "floor(4.9)", output: "4" },
+      { input: "round(4.5)", output: "5" },
+      { input: "sin(0), cos(0), tan(0)", output: "trig" },
+      { input: "log(100)", output: "2", desc: "log base 10" },
+      { input: "ln(e)", output: "1", desc: "natural log" },
+      { input: "min(3, 1, 2)", output: "1" },
+      { input: "max(3, 1, 2)", output: "3" },
+    ],
+  }],
 };

@@ -15,4 +15,12 @@ export const mathConstantsPlugin: PluginManifest = {
     { description: "tau ≈ 6.28318", input: "tau", expected: Math.PI * 2, tolerance: 0.00001 },
     { description: "2 * pi = tau", input: "2 * pi", expected: Math.PI * 2, tolerance: 0.00001 },
   ],
+  help: [{
+    title: "Constants",
+    examples: [
+      { input: "pi", output: "3.14159..." },
+      { input: "e", output: "2.71828..." },
+      { input: "tau", output: "6.28318..." },
+    ],
+  }],
 };

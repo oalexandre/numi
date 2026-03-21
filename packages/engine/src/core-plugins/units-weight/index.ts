@@ -19,4 +19,11 @@ export const unitsWeightPlugin: PluginManifest = {
     { description: "1 ton = 1000 kg", input: "1 t to kg", expected: 1000 },
     { description: "1 stone ≈ 6.35 kg", input: "1 st to kg", expected: 6.35029, tolerance: 0.01 },
   ],
+  help: [{
+    title: "Weight",
+    examples: [
+      { input: "1 kg to pounds", output: "2.205 lb" },
+      { input: "100 grams to oz", output: "3.527 oz" },
+    ],
+  }],
 };

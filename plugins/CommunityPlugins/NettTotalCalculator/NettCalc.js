@@ -10,3 +10,12 @@ numi.addFunction({ "id" : "nett", "phrases" : "nett" }, function(values) {
 
 });
 
+numi.addHelp({
+  title: "Nett Calculator",
+  description: "Calculate the net amount from a gross amount including tax",
+  examples: [
+    { input: "nett(120)", output: "100", desc: "Net from gross at default 20% tax" },
+    { input: "nett(110, 10)", output: "100", desc: "Net from gross at 10% tax" },
+  ],
+});
+

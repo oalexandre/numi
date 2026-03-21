@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import vm from "node:vm";
 
-import type { PluginTest } from "../core-plugins/types.js";
+import type { PluginTest, HelpSection } from "../core-plugins/types.js";
 import type { EntityRegistry } from "../registry/entity-registry.js";
 import type { UnitDefinition } from "../units/registry.js";
 
@@ -97,6 +97,10 @@ export class PluginHost {
 
       addTest(test: { description: string; input: string; line?: number; expected?: number | null; formatted?: string; tolerance?: number }): void {
         tests.push(test);
+      },
+
+      addHelp(section: { title: string; description?: string; examples: Array<{ input: string; output: string; desc?: string }> }): void {
+        entityReg.registerHelpSections([section], "community");
       },
     };
 

@@ -22,4 +22,13 @@ export const unitsLengthPlugin: PluginManifest = {
     { description: "1 foot ≈ 0.3048 m", input: "1 foot to m", expected: 0.3048, tolerance: 0.001 },
     { description: "1 nmi = 1852 m", input: "1 nmi to m", expected: 1852 },
   ],
+  help: [{
+    title: "Length",
+    description: "Use in, to, or as to convert between units.",
+    examples: [
+      { input: "5 km to miles", output: "3.107 mi" },
+      { input: "6 feet to cm", output: "182.88 cm" },
+      { input: "1 yard to meters", output: "0.9144 m" },
+    ],
+  }],
 };

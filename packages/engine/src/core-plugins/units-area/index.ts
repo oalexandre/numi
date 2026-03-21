@@ -18,4 +18,11 @@ export const unitsAreaPlugin: PluginManifest = {
     { description: "1 acre ≈ 0.405 ha", input: "1 acre to ha", expected: 0.404686, tolerance: 0.001 },
     { description: "1 sqft ≈ 0.0929 m²", input: "1 sqft to sqm", expected: 0.092903, tolerance: 0.001 },
   ],
+  help: [{
+    title: "Area",
+    examples: [
+      { input: "1 acre to m²", output: "4,046.856 m²" },
+      { input: "100 ft² to m²", output: "9.29 m²" },
+    ],
+  }],
 };

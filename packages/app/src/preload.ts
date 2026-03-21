@@ -1,6 +1,5 @@
 import { contextBridge, ipcRenderer } from "electron";
-import type { LineResult } from "@engine/index";
-import type { EntityInfo } from "@engine/index";
+import type { LineResult, EntityInfo, HelpSection } from "@engine/index";
 
 export const ilumiApi = {
   evaluate: (document: string): Promise<LineResult[]> => {
@@ -14,6 +13,9 @@ export const ilumiApi = {
   },
   getEntityNames: (): Promise<EntityInfo[]> => {
     return ipcRenderer.invoke("numi:getEntityNames");
+  },
+  getHelpSections: (): Promise<{ core: HelpSection[]; community: HelpSection[] }> => {
+    return ipcRenderer.invoke("numi:getHelpSections");
   },
   getTheme: (): Promise<"dark" | "light"> => {
     return ipcRenderer.invoke("numi:getTheme");

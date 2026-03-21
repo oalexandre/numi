@@ -19,4 +19,11 @@ export const unitsCssPlugin: PluginManifest = {
     { description: "1 rem = 16 px", input: "1 rem to px", expected: 16 },
     { description: "16 px = 12 pt", input: "16 px to pt", expected: 12 },
   ],
+  help: [{
+    title: "CSS Units",
+    examples: [
+      { input: "32 px to rem", output: "2 rem" },
+      { input: "1.5 rem to px", output: "24 px" },
+    ],
+  }],
 };

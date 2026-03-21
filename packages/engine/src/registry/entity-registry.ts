@@ -1,4 +1,4 @@
-import type { MathFn, LineRefHandler, LineRefContext } from "../core-plugins/types.js";
+import type { MathFn, LineRefHandler, LineRefContext, HelpSection } from "../core-plugins/types.js";
 import type { UnitDefinition } from "../units/registry.js";
 import { UnitRegistry } from "../units/registry.js";
 
@@ -20,6 +20,8 @@ export class EntityRegistry {
   private dateLiteralDetails = new Map<string, string>();
   private baseConversions = new Map<string, (n: number) => string>();
   private baseConversionDetails = new Map<string, string>();
+  private coreHelpSections: HelpSection[] = [];
+  private communityHelpSections: HelpSection[] = [];
 
   constructor(unitRegistry?: UnitRegistry) {
     this.unitRegistry = unitRegistry ?? new UnitRegistry();
@@ -54,6 +56,21 @@ export class EntityRegistry {
 
   addUnit(definition: UnitDefinition): void {
     this.unitRegistry.addUnit(definition);
+  }
+
+  registerHelpSections(sections: HelpSection[], source: "core" | "community"): void {
+    if (source === "core") {
+      this.coreHelpSections.push(...sections);
+    } else {
+      this.communityHelpSections.push(...sections);
+    }
+  }
+
+  getHelpSections(): { core: HelpSection[]; community: HelpSection[] } {
+    return {
+      core: [...this.coreHelpSections],
+      community: [...this.communityHelpSections],
+    };
   }
 
   // --- Query methods for parser ---

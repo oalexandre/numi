@@ -25,4 +25,14 @@ export const baseConversionPlugin: PluginManifest = {
     octal: { formatter: toOct, detail: "octal", aliases: ["oct"] },
     decimal: { formatter: toDec, detail: "decimal", aliases: ["dec"] },
   },
+  help: [{
+    title: "Number Formats",
+    examples: [
+      { input: "0xFF", output: "255", desc: "hexadecimal" },
+      { input: "0b1010", output: "10", desc: "binary" },
+      { input: "1.5e3", output: "1,500", desc: "scientific" },
+      { input: "255 in hex", output: "0xFF" },
+      { input: "10 in binary", output: "0b1010" },
+    ],
+  }],
 };

@@ -20,4 +20,11 @@ export const unitsVolumePlugin: PluginManifest = {
     { description: "1 cup ≈ 236.6 mL", input: "1 cup to mL", expected: 236.588, tolerance: 0.1 },
     { description: "1 L = 1000 mL", input: "1 L to mL", expected: 1000 },
   ],
+  help: [{
+    title: "Volume",
+    examples: [
+      { input: "1 gallon to liters", output: "3.785 L" },
+      { input: "500 ml to cups", output: "2.113 cups" },
+    ],
+  }],
 };

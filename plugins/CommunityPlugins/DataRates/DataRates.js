@@ -61,3 +61,13 @@ for (let unit of UNITS){
 
 numi.addTest({ description: "1 kbps = 1000 bps", input: "1 kbps to bps", expected: 1000 });
 numi.addTest({ description: "1 Mbps = 1000 kbps", input: "1 Mbps to kbps", expected: 1000 });
+
+numi.addHelp({
+  title: "Data Rates",
+  description: "Convert between data transfer rate units (bits and bytes per second)",
+  examples: [
+    { input: "100 Mbps to kbps", output: "100,000 kilobits/s" },
+    { input: "1 Gbps to MBps", output: "125 Megabytes/s", desc: "Bits to bytes" },
+    { input: "1 Kibps to bps", output: "1,024 bits/s", desc: "Binary prefix (1024-based)" },
+  ],
+});

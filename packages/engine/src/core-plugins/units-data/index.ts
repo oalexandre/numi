@@ -23,4 +23,11 @@ export const unitsDataPlugin: PluginManifest = {
     { description: "1 GB = 1000 MB", input: "1 GB to MB", expected: 1000 },
     { description: "1 GiB = 1024 MiB", input: "1 GiB to MiB", expected: 1024 },
   ],
+  help: [{
+    title: "Data",
+    examples: [
+      { input: "1 GB to MB", output: "1,024 MB" },
+      { input: "5 TB to GB", output: "5,120 GB" },
+    ],
+  }],
 };

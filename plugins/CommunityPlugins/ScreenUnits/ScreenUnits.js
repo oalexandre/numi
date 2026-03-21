@@ -34,3 +34,13 @@ numi.addFunction({ "id": "toRem", "phrases": "toRem, convertRem" }, function(val
 
   return 0;
 });
+
+numi.addHelp({
+  title: "Screen Units",
+  description: "Convert between px and rem, and calculate rem values",
+  examples: [
+    { input: "32 px to rem", output: "2 rem", desc: "Base 16px" },
+    { input: "toRem(24)", output: "1.5", desc: "Convert 24px to rem" },
+    { input: "toRem(24, 12)", output: "2", desc: "Convert with custom base size" },
+  ],
+});
