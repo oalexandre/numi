@@ -72,6 +72,9 @@ export function HelpPanel({ visible, onClose }: HelpPanelProps): React.JSX.Eleme
           </button>
           <IlumiLogo />
           <h2 style={{ fontSize: "16px", fontWeight: 600, marginTop: "10px" }}>Quick Reference</h2>
+          <span style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "2px" }}>
+            ilumi.oalexandre.com.br
+          </span>
         </div>
 
         <Section title="Basic Arithmetic">

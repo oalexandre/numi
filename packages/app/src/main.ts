@@ -144,8 +144,29 @@ app.on("before-quit", () => {
   app.isQuitting = true;
 });
 
+app.name = "Ilumi";
+
 app.whenReady().then(() => {
   pluginLoader.loadAll();
+
+  // About panel with branding
+  const iconForAbout = resolve(import.meta.dirname, "../../resources/icon-512.png");
+  app.setAboutPanelOptions({
+    applicationName: "Ilumi",
+    applicationVersion: app.getVersion(),
+    version: "",
+    copyright: "© 2026 Ilumi. All rights reserved.",
+    credits: "A smart calculator for everyday math.\nhttps://ilumi.oalexandre.com.br",
+    iconPath: iconForAbout,
+  });
+
+  // Set dock icon on macOS so the About panel shows the Ilumi logo
+  if (process.platform === "darwin") {
+    const dockIcon = nativeImage.createFromPath(iconForAbout);
+    if (!dockIcon.isEmpty()) {
+      app.dock.setIcon(dockIcon);
+    }
+  }
   // Rebuild parse options after all plugins are loaded
   doc.refreshParseOptions();
   createAppMenu();
