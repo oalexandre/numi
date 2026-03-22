@@ -106,7 +106,7 @@ export function DownloadButton() {
         )}
       </div>
 
-      <a href="https://github.com/sponsors/oalexandre" target="_blank" rel="noopener noreferrer" className="donate-btn">
+      <a href="https://donate.stripe.com/4gMdRb2RKb4vaNxdZ5aZi00" target="_blank" rel="noopener noreferrer" className="donate-btn">
         <span style={{ color: "var(--accent)" }}>♥</span>
         Donate
       </a>
