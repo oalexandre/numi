@@ -93,4 +93,4 @@ appImage:
 publish:
   provider: github
   owner: oalexandre
-  repo: numi
+  repo: ilumi

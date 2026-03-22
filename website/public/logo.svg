@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e1b2e"/>
+      <stop offset="100%" stop-color="#121020"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="38%" r="28%">
+      <stop offset="0%" stop-color="#ffc800" stop-opacity="0.16"/>
+      <stop offset="100%" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="gold" x1="0.5" y1="0" x2="0.5" y2="1">
+      <stop offset="0%" stop-color="#ffe066"/>
+      <stop offset="50%" stop-color="#f0b800"/>
+      <stop offset="100%" stop-color="#cc8800"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect x="16" y="16" width="480" height="480" rx="96" fill="url(#bg)"/>
+
+  <!-- Subtle glow behind the ± area -->
+  <circle cx="256" cy="165" r="130" fill="url(#glow)"/>
+
+  <!-- ± symbol (acts as the "dot" of the "i") -->
+
+  <!-- + vertical bar (extends above crossbar like a cursor) -->
+  <rect x="249" y="68" width="14" height="118" rx="7" fill="url(#gold)"/>
+  <!-- + horizontal bar -->
+  <rect x="198" y="120" width="116" height="14" rx="7" fill="url(#gold)"/>
+
+  <!-- − bar -->
+  <rect x="198" y="208" width="116" height="14" rx="7" fill="url(#gold)"/>
+
+  <!-- Stem of "i" -->
+  <rect x="230" y="272" width="52" height="138" rx="14" fill="url(#gold)"/>
+</svg>

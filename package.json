@@ -55,11 +55,11 @@
     "node": ">=20.0.0"
   },
   "lint-staged": {
-    "*.{ts,tsx}": [
+    "!(website/**)*.{ts,tsx}": [
       "eslint --fix",
       "prettier --write"
     ],
-    "*.{js,json,md,css,yml,yaml}": [
+    "!(website/**)*.{js,json,md,css,yml,yaml}": [
       "prettier --write"
     ]
   },

@@ -9,6 +9,7 @@ on:
       - "demo.gif"
       - "LICENSE"
       - ".gitignore"
+      - "website/**"
 
 concurrency:
   group: ci-${{ github.head_ref }}
