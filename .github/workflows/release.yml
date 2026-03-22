@@ -17,11 +17,11 @@ jobs:
       matrix:
         include:
           - os: macos-latest
-            build-cmd: pnpm dist:mac
+            platform-flag: --mac
           - os: windows-latest
-            build-cmd: pnpm dist:win
+            platform-flag: --win
           - os: ubuntu-latest
-            build-cmd: pnpm dist:linux
+            platform-flag: --linux
 
     steps:
       - uses: actions/checkout@v4
@@ -35,8 +35,13 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      - name: Build & Package
-        run: ${{ matrix.build-cmd }}
+      - name: Build app
+        run: pnpm build
+
+      - name: Package
+        run: npx electron-builder ${{ matrix.platform-flag }} --publish never
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4

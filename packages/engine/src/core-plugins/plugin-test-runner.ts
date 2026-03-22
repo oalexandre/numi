@@ -1,5 +1,6 @@
-import type { PluginTest } from "./types.js";
 import type { LineResult } from "../index.js";
+
+import type { PluginTest } from "./types.js";
 
 export interface TestResult {
   test: PluginTest;

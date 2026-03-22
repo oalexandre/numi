@@ -2,8 +2,9 @@ import { describe, it, expect } from "vitest";
 
 import { evaluate } from "../index.js";
 
-import { corePlugins } from "./index.js";
 import { runPluginTests } from "./plugin-test-runner.js";
+
+import { corePlugins } from "./index.js";
 
 describe("core plugin self-tests", () => {
   for (const plugin of corePlugins) {

@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import vm from "node:vm";
 
-import type { PluginTest, HelpSection } from "../core-plugins/types.js";
+import type { PluginTest } from "../core-plugins/types.js";
 import type { EntityRegistry } from "../registry/entity-registry.js";
 import type { UnitDefinition } from "../units/registry.js";
 

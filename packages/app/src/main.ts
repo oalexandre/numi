@@ -172,7 +172,7 @@ app.whenReady().then(() => {
   if (process.platform === "darwin") {
     const dockIcon = nativeImage.createFromPath(iconForAbout);
     if (!dockIcon.isEmpty()) {
-      app.dock.setIcon(dockIcon);
+      app.dock?.setIcon(dockIcon);
     }
   }
   // Rebuild parse options after all plugins are loaded

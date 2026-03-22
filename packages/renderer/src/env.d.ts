@@ -1,4 +1,4 @@
-import type { LineResult } from "@engine/index";
+import type { LineResult, HelpSection } from "@engine/index";
 
 interface EntityInfo {
   name: string;
@@ -17,6 +17,9 @@ interface IlumiApi {
   getCompletions: (unitPhrase: string) => Promise<string[]>;
   getAllUnits: () => Promise<string[]>;
   getEntityNames: () => Promise<EntityInfo[]>;
+  getHelpSections: () => Promise<{ core: HelpSection[]; community: HelpSection[] }>;
+  getConversionCompletions: (sourceWord: string) => Promise<EntityInfo[]>;
+  resolveSourceWord: (tokens: string[]) => Promise<string>;
   getTheme: () => Promise<"dark" | "light">;
   setTheme: (theme: "auto" | "dark" | "light") => Promise<"dark" | "light">;
   toggleTheme: () => Promise<"dark" | "light">;

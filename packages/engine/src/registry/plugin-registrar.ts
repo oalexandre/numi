@@ -1,4 +1,5 @@
 import type { PluginManifest } from "../core-plugins/types.js";
+
 import type { EntityRegistry } from "./entity-registry.js";
 
 export function registerPlugin(registry: EntityRegistry, manifest: PluginManifest): void {
@@ -33,7 +34,9 @@ export function registerPlugin(registry: EntityRegistry, manifest: PluginManifes
   }
 
   if (manifest.baseConversions) {
-    for (const [name, { formatter, detail, aliases, category }] of Object.entries(manifest.baseConversions)) {
+    for (const [name, { formatter, detail, aliases, category }] of Object.entries(
+      manifest.baseConversions,
+    )) {
       registry.registerBaseConversion(name, formatter, detail, category);
       if (aliases) {
         for (const alias of aliases) {
