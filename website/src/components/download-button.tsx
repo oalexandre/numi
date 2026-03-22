@@ -114,6 +114,14 @@ export function DownloadButton() {
       <div className="dl-meta">
         v0.1.0 · <a href={RELEASES}>All platforms</a>
       </div>
+
+      {mounted && os === "mac" && (
+        <p className="dl-note">
+          <strong>macOS:</strong> If you see &quot;cannot be opened&quot;, run{" "}
+          <code>xattr -cr /path/to/Ilumi.app</code> or go to{" "}
+          <em>System Settings → Privacy &amp; Security → Open Anyway</em>.
+        </p>
+      )}
     </div>
   );
 }
