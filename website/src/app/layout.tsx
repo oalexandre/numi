@@ -98,7 +98,7 @@ const jsonLd = {
     price: "0",
     priceCurrency: "USD",
   },
-  softwareVersion: "0.1.2",
+  softwareVersion: "0.1.3",
   license: "https://opensource.org/licenses/MIT",
 };
 
